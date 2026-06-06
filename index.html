@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GMC Plexiglass — Invoice / Facture</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#e8e8e8;padding:20px}
+.page{width:210mm;margin:0 auto;background:#fff}
+.copy{width:210mm;height:148mm;padding:6mm 8mm;position:relative;overflow:hidden;background:#fff}
+.cut-line{width:210mm;border:none;border-top:2px dashed #999;margin:0;text-align:center;line-height:0}
+.cut-line span{background:#e8e8e8;padding:0 8px;font-size:9px;color:#888;font-family:Arial;position:relative;top:-7px}
+.inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3mm}
+.company-name{font-size:10pt;font-weight:bold;color:#1A3A5C}
+.company-block{font-size:8pt;line-height:1.5}
+.company-reg{font-size:7pt;color:#555;margin-top:1mm}
+.inv-title{font-size:14pt;font-weight:bold;color:#1A3A5C;letter-spacing:1px;text-align:right}
+.inv-title-fr{font-size:9pt;color:#888;text-align:right}
+.inv-num-display{font-size:20pt;font-weight:900;color:#DC2626;letter-spacing:2px;text-align:right;margin-top:1mm}
+.meta-row{display:grid;grid-template-columns:30mm 50mm 1fr 32mm;gap:2mm;margin-bottom:2.5mm}
+.addr-row{display:grid;grid-template-columns:1fr 1fr 25mm 22mm 18mm;gap:2mm;margin-bottom:2mm}
+.field-box{border:1px solid #aaa;padding:1mm 2mm}
+.field-box label{display:block;color:#555;font-size:6pt;font-weight:bold;text-transform:uppercase;margin-bottom:0.5mm}
+.field-box input{border:none;outline:none;width:100%;font-size:8pt;background:transparent}
+.inv-table{width:100%;border-collapse:collapse;margin-bottom:2mm;font-size:7.5pt}
+.inv-table th{background:#1A3A5C;color:#fff;padding:1.5mm 2mm;text-align:center;font-size:6.5pt;font-weight:bold;border:1px solid #1A3A5C}
+.inv-table th.dl{text-align:left}
+.inv-table td{border:1px solid #ccc;padding:0.8mm 2mm;vertical-align:middle}
+.inv-table td input{border:none;outline:none;width:100%;background:transparent;font-size:7.5pt;text-align:center}
+.inv-table td.desc input{text-align:left}
+.inv-table tr:nth-child(even) td{background:#f9f9f9}
+.bottom-row{display:flex;justify-content:flex-end;margin-top:1mm}
+.totals{width:68mm;border-collapse:collapse;font-size:8pt}
+.totals td{border:1px solid #ccc;padding:1mm 2mm}
+.totals td:first-child{background:#f0f4f8;font-weight:bold;font-size:7pt;color:#1A3A5C;white-space:nowrap}
+.totals td:last-child{text-align:right}
+.totals td input{border:none;outline:none;width:100%;text-align:right;font-size:8pt;background:transparent;font-weight:600}
+.total-row td{background:#1A3A5C!important;color:#fff!important;font-weight:bold;font-size:9pt}
+.total-row input{color:#fff!important}
+.copy-badge{position:absolute;top:3mm;right:8mm;font-size:6.5pt;font-weight:bold;padding:1mm 3mm;border-radius:3px}
+.badge-client{background:#C8960C;color:#fff}
+.badge-merchant{background:#1A3A5C;color:#fff}
+.toolbar{display:flex;justify-content:center;align-items:center;gap:12px;padding:14px;background:#e8e8e8}
+.toolbar button{padding:9px 20px;border:none;border-radius:7px;cursor:pointer;font-size:.85rem;font-weight:700;font-family:Arial}
+.btn-print{background:#1A3A5C;color:#fff}
+.btn-new{background:#C8960C;color:#fff}
+.btn-clear{background:#E5E7EB;color:#333}
+.inv-counter{font-size:.8rem;color:#666;padding:0 8px}
+@media print{
+  body{background:#fff;padding:0}
+  .toolbar{display:none}
+  .copy{page-break-inside:avoid}
+  .cut-line span{background:#fff}
+  input{border:none!important;outline:none!important}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button class="btn-new" onclick="newInvoice()">➕ New Invoice / Nouvelle facture</button>
+  <span class="inv-counter" id="counter-display"></span>
+  <button class="btn-print" onclick="window.print()">🖨 Print / Imprimer</button>
+  <button class="btn-clear" onclick="clearFields()">🗑 Clear Fields</button>
+</div>
+
+<div class="page">
+
+  <!-- ═══ COPY 1 — CLIENT ═══ -->
+  <div class="copy">
+    <div class="copy-badge badge-client">CLIENT COPY / COPIE CLIENT</div>
+    <div class="inv-header">
+      <div class="company-block">
+        <div class="company-name">Entreprise GMC Plexiglass inc.</div>
+        <div>1205-3895 Chenonceau, Laval H7T 0L3</div>
+        <div class="company-reg">TPS/GST: 732249932RT0001 &nbsp;|&nbsp; TVQ/QST: 1227484345TQ0001</div>
+      </div>
+      <div>
+        <div class="inv-title">INVOICE</div>
+        <div class="inv-title-fr">FACTURE</div>
+        <div class="inv-num-display" id="num-display-1"></div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <div class="field-box"><label>Date</label><input id="f-date" oninput="syncField(this)" placeholder="DD/MM/YYYY"></div>
+      <div class="field-box"><label>Tax Reg. / N° de taxe</label><input id="f-tax" oninput="syncField(this)" placeholder="—"></div>
+      <div class="field-box"><label>Sold By / Vendu par</label><input id="f-soldby" oninput="syncField(this)" placeholder="—"></div>
+      <div class="field-box"><label>Customer Order / Commande</label><input id="f-custorder" oninput="syncField(this)" placeholder="—"></div>
+    </div>
+    <div class="addr-row">
+      <div class="field-box"><label>Sold To / Vendu à</label><input id="f-soldto" oninput="syncField(this)" placeholder="Name &amp; address"></div>
+      <div class="field-box"><label>Ship To / Expédier à</label><input id="f-shipto" oninput="syncField(this)" placeholder="Shipping address"></div>
+      <div class="field-box"><label>FOB / FAB</label><input id="f-fob" oninput="syncField(this)"></div>
+      <div class="field-box"><label>Terms / Conditions</label><input id="f-terms" oninput="syncField(this)"></div>
+      <div class="field-box"><label>Via</label><input id="f-via" oninput="syncField(this)"></div>
+    </div>
+    <table class="inv-table">
+      <thead><tr>
+        <th style="width:13mm">QTY<br>QUANTITÉ</th>
+        <th class="dl">DESCRIPTION</th>
+        <th style="width:22mm">PRICE<br>PRIX</th>
+        <th style="width:14mm">UNIT<br>UNITÉ</th>
+        <th style="width:24mm">AMOUNT<br>MONTANT</th>
+      </tr></thead>
+      <tbody id="tbody-1"></tbody>
+    </table>
+    <div class="bottom-row">
+      <table class="totals">
+        <tr><td>TPS / GST (5%)</td><td><input id="f-tps" readonly></td></tr>
+        <tr><td>TVQ / QST (9.975%)</td><td><input id="f-tvq" readonly></td></tr>
+        <tr class="total-row"><td>TOTAL</td><td><input id="f-total" readonly></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ CUT LINE ═══ -->
+  <div class="cut-line"><span>✂ &nbsp; CUT HERE / COUPER ICI &nbsp; ✂</span></div>
+
+  <!-- ═══ COPY 2 — MERCHANT ═══ -->
+  <div class="copy">
+    <div class="copy-badge badge-merchant">MERCHANT COPY / COPIE MARCHAND</div>
+    <div class="inv-header">
+      <div class="company-block">
+        <div class="company-name">Entreprise GMC Plexiglass inc.</div>
+        <div>1205-3895 Chenonceau, Laval H7T 0L3</div>
+        <div class="company-reg">TPS/GST: 732249932RT0001 &nbsp;|&nbsp; TVQ/QST: 1227484345TQ0001</div>
+      </div>
+      <div>
+        <div class="inv-title">INVOICE</div>
+        <div class="inv-title-fr">FACTURE</div>
+        <div class="inv-num-display" id="num-display-2"></div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <div class="field-box"><label>Date</label><input readonly id="m-date" placeholder="DD/MM/YYYY"></div>
+      <div class="field-box"><label>Tax Reg. / N° de taxe</label><input readonly id="m-tax"></div>
+      <div class="field-box"><label>Sold By / Vendu par</label><input readonly id="m-soldby"></div>
+      <div class="field-box"><label>Customer Order / Commande</label><input readonly id="m-custorder"></div>
+    </div>
+    <div class="addr-row">
+      <div class="field-box"><label>Sold To / Vendu à</label><input readonly id="m-soldto"></div>
+      <div class="field-box"><label>Ship To / Expédier à</label><input readonly id="m-shipto"></div>
+      <div class="field-box"><label>FOB / FAB</label><input readonly id="m-fob"></div>
+      <div class="field-box"><label>Terms / Conditions</label><input readonly id="m-terms"></div>
+      <div class="field-box"><label>Via</label><input readonly id="m-via"></div>
+    </div>
+    <table class="inv-table">
+      <thead><tr>
+        <th style="width:13mm">QTY<br>QUANTITÉ</th>
+        <th class="dl">DESCRIPTION</th>
+        <th style="width:22mm">PRICE<br>PRIX</th>
+        <th style="width:14mm">UNIT<br>UNITÉ</th>
+        <th style="width:24mm">AMOUNT<br>MONTANT</th>
+      </tr></thead>
+      <tbody id="tbody-2"></tbody>
+    </table>
+    <div class="bottom-row">
+      <table class="totals">
+        <tr><td>TPS / GST (5%)</td><td><input id="m-tps" readonly></td></tr>
+        <tr><td>TVQ / QST (9.975%)</td><td><input id="m-tvq" readonly></td></tr>
+        <tr class="total-row"><td>TOTAL</td><td><input id="m-total" readonly></td></tr>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ROWS = 6;
+const FIELD_MAP = {
+  'f-date':'m-date','f-tax':'m-tax','f-soldby':'m-soldby',
+  'f-custorder':'m-custorder','f-soldto':'m-soldto','f-shipto':'m-shipto',
+  'f-fob':'m-fob','f-terms':'m-terms','f-via':'m-via'
+};
+
+// ── AUTO INVOICE NUMBER ──
+function getInvNum() {
+  return parseInt(localStorage.getItem('gmc_inv_num') || '138656');
+}
+function setInvNum(n) {
+  localStorage.setItem('gmc_inv_num', n);
+}
+function showNum(n) {
+  const str = '#' + String(n).padStart(6,'0');
+  document.getElementById('num-display-1').textContent = str;
+  document.getElementById('num-display-2').textContent = str;
+  document.getElementById('counter-display').textContent = 'Invoice / Facture: ' + str;
+}
+
+// ── NEW INVOICE ──
+function newInvoice() {
+  if (hasData() && !confirm('Start new invoice? Current data will be lost.\nNouvelle facture? Les données actuelles seront perdues.')) return;
+  const next = getInvNum() + 1;
+  setInvNum(next);
+  showNum(next);
+  clearFields(true);
+  // Auto-fill today's date
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2,'0');
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const yyyy = today.getFullYear();
+  document.getElementById('f-date').value = `${dd}/${mm}/${yyyy}`;
+  syncField(document.getElementById('f-date'));
+}
+
+function hasData() {
+  return ['f-soldto','f-date'].some(id => document.getElementById(id)?.value?.trim());
+}
+
+// ── SYNC FIELDS ──
+function syncField(el) {
+  const mirror = FIELD_MAP[el.id];
+  if (mirror) document.getElementById(mirror).value = el.value;
+}
+
+// ── BUILD ROWS ──
+function buildRows() {
+  ['tbody-1','tbody-2'].forEach((id, ci) => {
+    const tbody = document.getElementById(id);
+    for (let i = 0; i < ROWS; i++) {
+      const ro = ci === 1 ? 'readonly' : '';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input id="r${i}-qty" ${ro} oninput="updateRow(${i})"></td>
+        <td class="desc"><input id="r${i}-desc" ${ro} style="text-align:left"></td>
+        <td><input id="r${i}-price" ${ro} oninput="updateRow(${i})" type="number" step="0.01" min="0"></td>
+        <td><input id="r${i}-unit" ${ro}></td>
+        <td><input id="r${i}-amt" readonly style="font-weight:600;color:#1A3A5C"></td>
+      `;
+      tbody.appendChild(tr);
+    }
+  });
+  // Sync desc and unit fields from copy1 to copy2
+  document.querySelectorAll('[id^="r"][id$="-desc"],[id^="r"][id$="-unit"]').forEach(el => {
+    if (!el.readOnly) el.addEventListener('input', () => {
+      const mirror = document.getElementById(el.id.replace('r','r').replace('-desc','2-desc').replace('-unit','2-unit'));
+    });
+  });
+}
+
+function updateRow(i) {
+  const qty = parseFloat(document.getElementById(`r${i}-qty`)?.value) || 0;
+  const price = parseFloat(document.getElementById(`r${i}-price`)?.value) || 0;
+  const amt = qty * price;
+  // Update copy 1
+  document.getElementById(`r${i}-amt`).value = amt > 0 ? '$' + amt.toFixed(2) : '';
+  // Sync copy 2
+  syncCopy2Row(i);
+  calcTotals();
+}
+
+function syncCopy2Row(i) {
+  const fields = ['qty','desc','price','unit','amt'];
+  // The second tbody has same IDs - we need separate IDs
+  // Let's fix by referencing rows directly
+  const tbody1 = document.getElementById('tbody-1');
+  const tbody2 = document.getElementById('tbody-2');
+  if (!tbody1 || !tbody2) return;
+  const row1 = tbody1.rows[i];
+  const row2 = tbody2.rows[i];
+  if (!row1 || !row2) return;
+  row1.querySelectorAll('input').forEach((el, j) => {
+    row2.querySelectorAll('input')[j].value = el.value;
+  });
+}
+
+function calcTotals() {
+  const tbody1 = document.getElementById('tbody-1');
+  let subtotal = 0;
+  tbody1.querySelectorAll('tr').forEach(row => {
+    const amtEl = row.querySelectorAll('input')[4];
+    const raw = (amtEl?.value || '').replace('$','');
+    subtotal += parseFloat(raw) || 0;
+  });
+  const tps = subtotal * 0.05;
+  const tvq = subtotal * 0.09975;
+  const total = subtotal + tps + tvq;
+  const fmt = v => v > 0 ? '$' + v.toFixed(2) : '';
+  ['f-tps','m-tps'].forEach(id => document.getElementById(id).value = fmt(tps));
+  ['f-tvq','m-tvq'].forEach(id => document.getElementById(id).value = fmt(tvq));
+  ['f-total','m-total'].forEach(id => document.getElementById(id).value = fmt(total));
+}
+
+function clearFields(skipConfirm) {
+  if (!skipConfirm && !confirm('Clear all fields? / Effacer tous les champs?')) return;
+  document.querySelectorAll('input').forEach(el => { el.value = ''; });
+}
+
+// ── INIT ──
+buildRows();
+showNum(getInvNum());
+// Auto-fill today's date on load
+const today = new Date();
+const dd = String(today.getDate()).padStart(2,'0');
+const mm = String(today.getMonth()+1).padStart(2,'0');
+document.getElementById('f-date').value = `${dd}/${mm}/${today.getFullYear()}`;
+syncField(document.getElementById('f-date'));
+</script>
+</body>
+</html>

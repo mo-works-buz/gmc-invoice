@@ -18,7 +18,7 @@ body{font-family:Arial,sans-serif;background:#e8e8e8;padding:20px}
 .inv-title{font-size:14pt;font-weight:bold;color:#1A3A5C;letter-spacing:1px;text-align:right}
 .inv-title-fr{font-size:9pt;color:#888;text-align:right}
 .inv-num-display{font-size:20pt;font-weight:900;color:#DC2626;letter-spacing:2px;text-align:right;margin-top:1mm}
-.meta-row{display:grid;grid-template-columns:30mm 50mm 1fr 32mm;gap:2mm;margin-bottom:2.5mm}
+.meta-row{display:grid;grid-template-columns:30mm 1fr 32mm;gap:2mm;margin-bottom:2.5mm}
 .addr-row{display:grid;grid-template-columns:1fr 1fr 25mm 22mm 18mm;gap:2mm;margin-bottom:2mm}
 .field-box{border:1px solid #aaa;padding:1mm 2mm}
 .field-box label{display:block;color:#555;font-size:6pt;font-weight:bold;text-transform:uppercase;margin-bottom:0.5mm}
@@ -85,7 +85,6 @@ body{font-family:Arial,sans-serif;background:#e8e8e8;padding:20px}
     </div>
     <div class="meta-row">
       <div class="field-box"><label>Date</label><input id="f-date" oninput="syncField(this)" placeholder="DD/MM/YYYY"></div>
-      <div class="field-box"><label>Tax Reg. / N° de taxe</label><input id="f-tax" oninput="syncField(this)" placeholder="—"></div>
       <div class="field-box"><label>Sold By / Vendu par</label><input id="f-soldby" oninput="syncField(this)" placeholder="—"></div>
       <div class="field-box"><label>Customer Order / Commande</label><input id="f-custorder" oninput="syncField(this)" placeholder="—"></div>
     </div>
@@ -135,7 +134,6 @@ body{font-family:Arial,sans-serif;background:#e8e8e8;padding:20px}
     </div>
     <div class="meta-row">
       <div class="field-box"><label>Date</label><input readonly id="m-date" placeholder="DD/MM/YYYY"></div>
-      <div class="field-box"><label>Tax Reg. / N° de taxe</label><input readonly id="m-tax"></div>
       <div class="field-box"><label>Sold By / Vendu par</label><input readonly id="m-soldby"></div>
       <div class="field-box"><label>Customer Order / Commande</label><input readonly id="m-custorder"></div>
     </div>
@@ -170,12 +168,11 @@ body{font-family:Arial,sans-serif;background:#e8e8e8;padding:20px}
 <script>
 const ROWS = 6;
 const FIELD_MAP = {
-  'f-date':'m-date','f-tax':'m-tax','f-soldby':'m-soldby',
+  'f-date':'m-date','f-soldby':'m-soldby',
   'f-custorder':'m-custorder','f-soldto':'m-soldto','f-shipto':'m-shipto',
   'f-fob':'m-fob','f-terms':'m-terms','f-via':'m-via'
 };
 
-// ── AUTO INVOICE NUMBER ──
 function getInvNum() {
   return parseInt(localStorage.getItem('gmc_inv_num') || '138656');
 }
@@ -189,19 +186,16 @@ function showNum(n) {
   document.getElementById('counter-display').textContent = 'Invoice / Facture: ' + str;
 }
 
-// ── NEW INVOICE ──
 function newInvoice() {
   if (hasData() && !confirm('Start new invoice? Current data will be lost.\nNouvelle facture? Les données actuelles seront perdues.')) return;
   const next = getInvNum() + 1;
   setInvNum(next);
   showNum(next);
   clearFields(true);
-  // Auto-fill today's date
   const today = new Date();
   const dd = String(today.getDate()).padStart(2,'0');
   const mm = String(today.getMonth()+1).padStart(2,'0');
-  const yyyy = today.getFullYear();
-  document.getElementById('f-date').value = `${dd}/${mm}/${yyyy}`;
+  document.getElementById('f-date').value = `${dd}/${mm}/${today.getFullYear()}`;
   syncField(document.getElementById('f-date'));
 }
 
@@ -209,13 +203,11 @@ function hasData() {
   return ['f-soldto','f-date'].some(id => document.getElementById(id)?.value?.trim());
 }
 
-// ── SYNC FIELDS ──
 function syncField(el) {
   const mirror = FIELD_MAP[el.id];
   if (mirror) document.getElementById(mirror).value = el.value;
 }
 
-// ── BUILD ROWS ──
 function buildRows() {
   ['tbody-1','tbody-2'].forEach((id, ci) => {
     const tbody = document.getElementById(id);
@@ -232,29 +224,18 @@ function buildRows() {
       tbody.appendChild(tr);
     }
   });
-  // Sync desc and unit fields from copy1 to copy2
-  document.querySelectorAll('[id^="r"][id$="-desc"],[id^="r"][id$="-unit"]').forEach(el => {
-    if (!el.readOnly) el.addEventListener('input', () => {
-      const mirror = document.getElementById(el.id.replace('r','r').replace('-desc','2-desc').replace('-unit','2-unit'));
-    });
-  });
 }
 
 function updateRow(i) {
   const qty = parseFloat(document.getElementById(`r${i}-qty`)?.value) || 0;
   const price = parseFloat(document.getElementById(`r${i}-price`)?.value) || 0;
   const amt = qty * price;
-  // Update copy 1
   document.getElementById(`r${i}-amt`).value = amt > 0 ? '$' + amt.toFixed(2) : '';
-  // Sync copy 2
   syncCopy2Row(i);
   calcTotals();
 }
 
 function syncCopy2Row(i) {
-  const fields = ['qty','desc','price','unit','amt'];
-  // The second tbody has same IDs - we need separate IDs
-  // Let's fix by referencing rows directly
   const tbody1 = document.getElementById('tbody-1');
   const tbody2 = document.getElementById('tbody-2');
   if (!tbody1 || !tbody2) return;
@@ -288,10 +269,8 @@ function clearFields(skipConfirm) {
   document.querySelectorAll('input').forEach(el => { el.value = ''; });
 }
 
-// ── INIT ──
 buildRows();
 showNum(getInvNum());
-// Auto-fill today's date on load
 const today = new Date();
 const dd = String(today.getDate()).padStart(2,'0');
 const mm = String(today.getMonth()+1).padStart(2,'0');

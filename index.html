@@ -3,279 +3,342 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>GMC Plexiglass — Invoice / Facture</title>
+<title>GMC Invoice</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Arial,sans-serif;background:#e8e8e8;padding:20px}
-.page{width:210mm;margin:0 auto;background:#fff}
-.copy{width:210mm;height:148mm;padding:6mm 8mm;position:relative;overflow:hidden;background:#fff}
-.cut-line{width:210mm;border:none;border-top:2px dashed #999;margin:0;text-align:center;line-height:0}
-.cut-line span{background:#e8e8e8;padding:0 8px;font-size:9px;color:#888;font-family:Arial;position:relative;top:-7px}
-.inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3mm}
-.company-name{font-size:10pt;font-weight:bold;color:#1A3A5C}
-.company-block{font-size:8pt;line-height:1.5}
-.company-reg{font-size:7pt;color:#555;margin-top:1mm}
-.inv-title{font-size:14pt;font-weight:bold;color:#1A3A5C;letter-spacing:1px;text-align:right}
-.inv-title-fr{font-size:9pt;color:#888;text-align:right}
-.inv-num-display{font-size:20pt;font-weight:900;color:#DC2626;letter-spacing:2px;text-align:right;margin-top:1mm}
-.meta-row{display:grid;grid-template-columns:30mm 1fr 32mm;gap:2mm;margin-bottom:2.5mm}
-.addr-row{display:grid;grid-template-columns:1fr 1fr 25mm 22mm 18mm;gap:2mm;margin-bottom:2mm}
-.field-box{border:1px solid #aaa;padding:1mm 2mm}
-.field-box label{display:block;color:#555;font-size:6pt;font-weight:bold;text-transform:uppercase;margin-bottom:0.5mm}
-.field-box input{border:none;outline:none;width:100%;font-size:8pt;background:transparent}
-.inv-table{width:100%;border-collapse:collapse;margin-bottom:2mm;font-size:7.5pt}
-.inv-table th{background:#1A3A5C;color:#fff;padding:1.5mm 2mm;text-align:center;font-size:6.5pt;font-weight:bold;border:1px solid #1A3A5C}
-.inv-table th.dl{text-align:left}
-.inv-table td{border:1px solid #ccc;padding:0.8mm 2mm;vertical-align:middle}
-.inv-table td input{border:none;outline:none;width:100%;background:transparent;font-size:7.5pt;text-align:center}
-.inv-table td.desc input{text-align:left}
-.inv-table tr:nth-child(even) td{background:#f9f9f9}
-.bottom-row{display:flex;justify-content:flex-end;margin-top:1mm}
-.totals{width:68mm;border-collapse:collapse;font-size:8pt}
-.totals td{border:1px solid #ccc;padding:1mm 2mm}
-.totals td:first-child{background:#f0f4f8;font-weight:bold;font-size:7pt;color:#1A3A5C;white-space:nowrap}
-.totals td:last-child{text-align:right}
-.totals td input{border:none;outline:none;width:100%;text-align:right;font-size:8pt;background:transparent;font-weight:600}
-.total-row td{background:#1A3A5C!important;color:#fff!important;font-weight:bold;font-size:9pt}
-.total-row input{color:#fff!important}
-.copy-badge{position:absolute;top:3mm;right:8mm;font-size:6.5pt;font-weight:bold;padding:1mm 3mm;border-radius:3px}
-.badge-client{background:#C8960C;color:#fff}
-.badge-merchant{background:#1A3A5C;color:#fff}
-.toolbar{display:flex;justify-content:center;align-items:center;gap:12px;padding:14px;background:#e8e8e8}
-.toolbar button{padding:9px 20px;border:none;border-radius:7px;cursor:pointer;font-size:.85rem;font-weight:700;font-family:Arial}
-.btn-print{background:#1A3A5C;color:#fff}
-.btn-new{background:#C8960C;color:#fff}
-.btn-clear{background:#E5E7EB;color:#333}
-.inv-counter{font-size:.8rem;color:#666;padding:0 8px}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
+.screen-controls{background:#1A3A5C;color:#fff;border-radius:10px;padding:14px 18px;margin-bottom:22px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.sc-group{display:flex;flex-direction:column;gap:3px}
+.sc-group label{font-size:.68rem;font-weight:700;text-transform:uppercase;color:#aac4e0;letter-spacing:.5px}
+.sc-group input,.sc-group select{padding:6px 9px;border:1px solid #3a5a7c;border-radius:5px;font-size:.83rem;background:#0d2035;color:#fff;outline:none;width:100%}
+.sc-group input:focus,.sc-group select:focus{border-color:#C8960C}
+.sc-group select option{background:#1A3A5C}
+.sc-btn{padding:8px 18px;border:none;border-radius:6px;cursor:pointer;font-size:.83rem;font-weight:700;margin-top:auto}
+.sc-btn.print{background:#C8960C;color:#fff}
+.sc-btn.new{background:#2a5a2a;color:#fff}
+.page-wrap{display:flex;flex-direction:column;gap:28px}
+/* INVOICE COPY */
+.inv{background:#fff;width:210mm;margin:0 auto;padding:11mm 13mm 9mm;font-size:9pt;position:relative;box-shadow:0 3px 14px rgba(0,0,0,.18)}
+.copy-tag{position:absolute;top:7mm;right:7mm;background:#1A3A5C;color:#fff;font-size:6.5pt;font-weight:700;padding:2px 7px;border-radius:3px;letter-spacing:1px}
+/* HEADER */
+.inv-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:5mm;border-bottom:2.5px solid #1A3A5C;margin-bottom:5mm}
+.inv-logo{display:flex;align-items:center;gap:9px}
+.inv-badge{background:#C8960C;color:#1A3A5C;font-weight:900;font-size:10pt;width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center}
+.inv-co .co-name{font-size:12.5pt;font-weight:800;color:#1A3A5C}
+.inv-co .co-city{font-size:7.5pt;color:#777;margin-top:1px}
+.inv-co .co-tax{font-size:6.8pt;color:#999;margin-top:3px}
+.inv-num-block{text-align:right}
+.inv-num-block .lbl{font-size:7pt;color:#aaa;text-transform:uppercase;letter-spacing:1px}
+.inv-num-block .num{font-size:15pt;font-weight:800;color:#C8960C}
+.inv-num-block .dt{font-size:8pt;color:#555;margin-top:3px}
+/* META ROW */
+.meta-row{display:grid;grid-template-columns:30mm 1fr 32mm;gap:5px;margin-bottom:5mm}
+.meta-box{border:1px solid #e0e6ee;border-radius:5px;padding:4px 7px}
+.meta-box .ml{font-size:6.2pt;color:#aaa;text-transform:uppercase;font-weight:700;margin-bottom:2px}
+.meta-box .mv{font-size:8.5pt;color:#1A3A5C;font-weight:600}
+.meta-box .mv2{font-size:7.5pt;color:#888;margin-top:1px}
+/* ITEMS TABLE */
+.items-tbl{width:100%;border-collapse:collapse;margin-bottom:4mm}
+.items-tbl thead tr{background:#1A3A5C}
+.items-tbl thead th{color:#fff;padding:5px 7px;font-size:7.5pt;font-weight:600;text-align:left}
+.items-tbl thead th:nth-child(2){text-align:center;width:46pt}
+.items-tbl thead th:nth-child(3){text-align:right;width:58pt}
+.items-tbl thead th:nth-child(4){text-align:right;width:64pt}
+.items-tbl tbody td{border-bottom:1px solid #f2f4f8;padding:5px 7px;font-size:8pt;vertical-align:middle}
+.items-tbl tbody td:nth-child(2){text-align:center}
+.items-tbl tbody td:nth-child(3),.items-tbl tbody td:nth-child(4){text-align:right}
+.items-tbl tbody td input{border:none;outline:none;font-size:8pt;background:transparent;font-family:inherit;width:100%}
+.items-tbl tbody td:nth-child(2) input{text-align:center}
+.items-tbl tbody td:nth-child(3) input{text-align:right}
+.items-tbl tbody tr:last-child td{border-bottom:none}
+/* TOTALS */
+.totals-wrap{display:flex;justify-content:flex-end;margin-bottom:5mm}
+.totals-box{width:62mm}
+.t-row{display:flex;justify-content:space-between;padding:3px 0;font-size:8pt;color:#555;border-bottom:1px solid #f2f4f8}
+.t-row.cut-fee{color:#1A3A5C;font-weight:600;background:#fffbf0;padding:3px 4px;border-radius:3px;border-bottom:1px solid #ffe9a0}
+.t-row.grand{border-top:2px solid #1A3A5C;border-bottom:none;margin-top:4px;padding-top:5px;font-size:10.5pt;font-weight:800;color:#1A3A5C}
+.t-row.grand span:last-child{color:#C8960C}
+/* NOTES */
+.inv-notes{font-size:7.5pt;color:#666;border-top:1px solid #eee;padding-top:3mm;margin-bottom:3mm}
+.inv-notes strong{color:#333}
+/* FOOTER */
+.inv-footer{text-align:center;font-size:6.8pt;color:#bbb;border-top:1px solid #eee;padding-top:3mm}
 @media print{
   body{background:#fff;padding:0}
-  .toolbar{display:none}
-  .copy{page-break-inside:avoid}
-  .cut-line span{background:#fff}
-  input{border:none!important;outline:none!important}
-  @page{size:A4;margin:0}
+  .screen-controls{display:none!important}
+  .page-wrap{gap:0}
+  .inv{box-shadow:none;page-break-after:always;margin:0;width:100%}
+  .inv:last-child{page-break-after:avoid}
+  .items-tbl tbody td input{pointer-events:none}
 }
 </style>
 </head>
 <body>
-
-<div class="toolbar">
-  <button class="btn-new" onclick="newInvoice()">➕ New Invoice / Nouvelle facture</button>
-  <span class="inv-counter" id="counter-display"></span>
-  <button class="btn-print" onclick="window.print()">🖨 Print / Imprimer</button>
-  <button class="btn-clear" onclick="clearFields()">🗑 Clear Fields</button>
+<div class="screen-controls">
+  <div class="sc-group" style="width:80px"><label>Invoice #</label><input id="cNum" type="text"></div>
+  <div class="sc-group" style="width:130px"><label>Date</label><input id="cDate" type="date"></div>
+  <div class="sc-group" style="width:150px"><label>Customer Name</label><input id="cCust" type="text" placeholder="Client name"></div>
+  <div class="sc-group" style="width:120px"><label>Phone</label><input id="cPhone" type="text" placeholder="514-xxx-xxxx"></div>
+  <div class="sc-group" style="width:150px">
+    <label>Payment Method</label>
+    <select id="cPay">
+      <option value="💵 Cash">💵 Cash</option>
+      <option value="💳 Credit Card">💳 Credit Card</option>
+      <option value="🏧 Debit Card">🏧 Debit Card</option>
+      <option value="📱 E-Transfer">📱 E-Transfer</option>
+      <option value="🖊 Cheque">🖊 Cheque</option>
+    </select>
+  </div>
+  <div class="sc-group" style="width:100px"><label>Sheet Price ($)</label><input id="cSheet" type="number" min="0" step="0.01" value="" placeholder="0.00"></div>
+  <div class="sc-group" style="width:80px"><label>Cuts ($20 ea)</label><input id="cCuts" type="number" min="0" value="0" placeholder="0"></div>
+  <div class="sc-group" style="width:180px"><label>Notes</label><input id="cNotes" type="text" placeholder="Optional"></div>
+  <button class="sc-btn print" onclick="window.print()">🖨 Print Both</button>
+  <button class="sc-btn new" onclick="newInv()">➕ New Invoice</button>
 </div>
 
-<div class="page">
-
-  <!-- ═══ COPY 1 — CLIENT ═══ -->
-  <div class="copy">
-    <div class="copy-badge badge-client">CLIENT COPY / COPIE CLIENT</div>
+<div class="page-wrap">
+  <div class="inv" id="c1">
+    <div class="copy-tag">CLIENT COPY</div>
     <div class="inv-header">
-      <div class="company-block">
-        <div class="company-name">Entreprise GMC Plexiglass inc.</div>
-        <div>1205-3895 Chenonceau, Laval H7T 0L3</div>
-        <div class="company-reg">TPS/GST: 732249932RT0001 &nbsp;|&nbsp; TVQ/QST: 1227484345TQ0001</div>
+      <div class="inv-logo">
+        <div class="inv-badge">GMC</div>
+        <div class="inv-co">
+          <div class="co-name">GMC Plexiglass</div>
+          <div class="co-city">Montreal, QC, Canada</div>
+          <div class="co-tax">TPS/GST: 732249932RT0001 &nbsp;|&nbsp; TVQ/QST: 1227484345TQ0001</div>
+        </div>
       </div>
-      <div>
-        <div class="inv-title">INVOICE</div>
-        <div class="inv-title-fr">FACTURE</div>
-        <div class="inv-num-display" id="num-display-1"></div>
+      <div class="inv-num-block">
+        <div class="lbl">Invoice / Facture</div>
+        <div class="num" id="dNum1"></div>
+        <div class="dt" id="dDate1"></div>
       </div>
     </div>
     <div class="meta-row">
-      <div class="field-box"><label>Date</label><input id="f-date" oninput="syncField(this)" placeholder="DD/MM/YYYY"></div>
-      <div class="field-box"><label>Sold By / Vendu par</label><input id="f-soldby" oninput="syncField(this)" placeholder="—"></div>
-      <div class="field-box"><label>Customer Order / Commande</label><input id="f-custorder" oninput="syncField(this)" placeholder="—"></div>
+      <div class="meta-box">
+        <div class="ml">Bill To / Facturer à</div>
+        <div class="mv" id="dCust1">—</div>
+        <div class="mv2" id="dPhone1"></div>
+      </div>
+      <div class="meta-box">
+        <div class="ml">Notes</div>
+        <div class="mv" id="dNotes1" style="font-size:8pt">—</div>
+      </div>
+      <div class="meta-box">
+        <div class="ml">Payment / Paiement</div>
+        <div class="mv" id="dPay1">💵 Cash</div>
+      </div>
     </div>
-    <div class="addr-row">
-      <div class="field-box"><label>Sold To / Vendu à</label><input id="f-soldto" oninput="syncField(this)" placeholder="Name &amp; address"></div>
-      <div class="field-box"><label>Ship To / Expédier à</label><input id="f-shipto" oninput="syncField(this)" placeholder="Shipping address"></div>
-      <div class="field-box"><label>FOB / FAB</label><input id="f-fob" oninput="syncField(this)"></div>
-      <div class="field-box"><label>Terms / Conditions</label><input id="f-terms" oninput="syncField(this)"></div>
-      <div class="field-box"><label>Via</label><input id="f-via" oninput="syncField(this)"></div>
-    </div>
-    <table class="inv-table">
+    <table class="items-tbl">
       <thead><tr>
-        <th style="width:13mm">QTY<br>QUANTITÉ</th>
-        <th class="dl">DESCRIPTION</th>
-        <th style="width:22mm">PRICE<br>PRIX</th>
-        <th style="width:14mm">UNIT<br>UNITÉ</th>
-        <th style="width:24mm">AMOUNT<br>MONTANT</th>
+        <th>Description / Description</th>
+        <th>Unit / Unité</th>
+        <th>Price / Prix</th>
+        <th>Amount / Montant</th>
       </tr></thead>
-      <tbody id="tbody-1"></tbody>
+      <tbody id="tb1"></tbody>
     </table>
-    <div class="bottom-row">
-      <table class="totals">
-        <tr><td>TPS / GST (5%)</td><td><input id="f-tps" readonly></td></tr>
-        <tr><td>TVQ / QST (9.975%)</td><td><input id="f-tvq" readonly></td></tr>
-        <tr class="total-row"><td>TOTAL</td><td><input id="f-total" readonly></td></tr>
-      </table>
+    <div class="totals-wrap">
+      <div class="totals-box">
+        <div class="t-row"><span>Subtotal / Sous-total</span><span id="sub1">$0.00</span></div>
+        <div class="t-row"><span>TPS / GST (5%)</span><span id="tps1">$0.00</span></div>
+        <div class="t-row"><span>TVQ / QST (9.975%)</span><span id="tvq1">$0.00</span></div>
+        <div class="t-row grand"><span>TOTAL</span><span id="tot1">$0.00</span></div>
+      </div>
     </div>
+    <div class="inv-footer">Thank you for your business! &nbsp;—&nbsp; GMC Plexiglass &nbsp;|&nbsp; Merci pour votre confiance!</div>
   </div>
 
-  <!-- ═══ CUT LINE ═══ -->
-  <div class="cut-line"><span>✂ &nbsp; CUT HERE / COUPER ICI &nbsp; ✂</span></div>
-
-  <!-- ═══ COPY 2 — MERCHANT ═══ -->
-  <div class="copy">
-    <div class="copy-badge badge-merchant">MERCHANT COPY / COPIE MARCHAND</div>
+  <div class="inv" id="c2">
+    <div class="copy-tag">MERCHANT COPY</div>
     <div class="inv-header">
-      <div class="company-block">
-        <div class="company-name">Entreprise GMC Plexiglass inc.</div>
-        <div>1205-3895 Chenonceau, Laval H7T 0L3</div>
-        <div class="company-reg">TPS/GST: 732249932RT0001 &nbsp;|&nbsp; TVQ/QST: 1227484345TQ0001</div>
+      <div class="inv-logo">
+        <div class="inv-badge">GMC</div>
+        <div class="inv-co">
+          <div class="co-name">GMC Plexiglass</div>
+          <div class="co-city">Montreal, QC, Canada</div>
+          <div class="co-tax">TPS/GST: 732249932RT0001 &nbsp;|&nbsp; TVQ/QST: 1227484345TQ0001</div>
+        </div>
       </div>
-      <div>
-        <div class="inv-title">INVOICE</div>
-        <div class="inv-title-fr">FACTURE</div>
-        <div class="inv-num-display" id="num-display-2"></div>
+      <div class="inv-num-block">
+        <div class="lbl">Invoice / Facture</div>
+        <div class="num" id="dNum2"></div>
+        <div class="dt" id="dDate2"></div>
       </div>
     </div>
     <div class="meta-row">
-      <div class="field-box"><label>Date</label><input readonly id="m-date" placeholder="DD/MM/YYYY"></div>
-      <div class="field-box"><label>Sold By / Vendu par</label><input readonly id="m-soldby"></div>
-      <div class="field-box"><label>Customer Order / Commande</label><input readonly id="m-custorder"></div>
+      <div class="meta-box">
+        <div class="ml">Bill To / Facturer à</div>
+        <div class="mv" id="dCust2">—</div>
+        <div class="mv2" id="dPhone2"></div>
+      </div>
+      <div class="meta-box">
+        <div class="ml">Notes</div>
+        <div class="mv" id="dNotes2" style="font-size:8pt">—</div>
+      </div>
+      <div class="meta-box">
+        <div class="ml">Payment / Paiement</div>
+        <div class="mv" id="dPay2">💵 Cash</div>
+      </div>
     </div>
-    <div class="addr-row">
-      <div class="field-box"><label>Sold To / Vendu à</label><input readonly id="m-soldto"></div>
-      <div class="field-box"><label>Ship To / Expédier à</label><input readonly id="m-shipto"></div>
-      <div class="field-box"><label>FOB / FAB</label><input readonly id="m-fob"></div>
-      <div class="field-box"><label>Terms / Conditions</label><input readonly id="m-terms"></div>
-      <div class="field-box"><label>Via</label><input readonly id="m-via"></div>
-    </div>
-    <table class="inv-table">
+    <table class="items-tbl">
       <thead><tr>
-        <th style="width:13mm">QTY<br>QUANTITÉ</th>
-        <th class="dl">DESCRIPTION</th>
-        <th style="width:22mm">PRICE<br>PRIX</th>
-        <th style="width:14mm">UNIT<br>UNITÉ</th>
-        <th style="width:24mm">AMOUNT<br>MONTANT</th>
+        <th>Description / Description</th>
+        <th>Unit / Unité</th>
+        <th>Price / Prix</th>
+        <th>Amount / Montant</th>
       </tr></thead>
-      <tbody id="tbody-2"></tbody>
+      <tbody id="tb2"></tbody>
     </table>
-    <div class="bottom-row">
-      <table class="totals">
-        <tr><td>TPS / GST (5%)</td><td><input id="m-tps" readonly></td></tr>
-        <tr><td>TVQ / QST (9.975%)</td><td><input id="m-tvq" readonly></td></tr>
-        <tr class="total-row"><td>TOTAL</td><td><input id="m-total" readonly></td></tr>
-      </table>
+    <div class="totals-wrap">
+      <div class="totals-box">
+        <div class="t-row"><span>Subtotal / Sous-total</span><span id="sub2">$0.00</span></div>
+        <div class="t-row"><span>TPS / GST (5%)</span><span id="tps2">$0.00</span></div>
+        <div class="t-row"><span>TVQ / QST (9.975%)</span><span id="tvq2">$0.00</span></div>
+        <div class="t-row grand"><span>TOTAL</span><span id="tot2">$0.00</span></div>
+      </div>
     </div>
+    <div class="inv-footer">Thank you for your business! &nbsp;—&nbsp; GMC Plexiglass &nbsp;|&nbsp; Merci pour votre confiance!</div>
   </div>
-
 </div>
 
 <script>
-const ROWS = 6;
-const FIELD_MAP = {
-  'f-date':'m-date','f-soldby':'m-soldby',
-  'f-custorder':'m-custorder','f-soldto':'m-soldto','f-shipto':'m-shipto',
-  'f-fob':'m-fob','f-terms':'m-terms','f-via':'m-via'
-};
+const NROWS = 3; // manual rows
+let rows = Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
+let sheetDesc = ''; // editable description for sheet row
 
-function getInvNum() {
-  return parseInt(localStorage.getItem('gmc_inv_num') || '138656');
-}
-function setInvNum(n) {
-  localStorage.setItem('gmc_inv_num', n);
-}
-function showNum(n) {
-  const str = '#' + String(n).padStart(6,'0');
-  document.getElementById('num-display-1').textContent = str;
-  document.getElementById('num-display-2').textContent = str;
-  document.getElementById('counter-display').textContent = 'Invoice / Facture: ' + str;
+function getNum(){return parseInt(localStorage.getItem('gmc_inv_n')||'138656');}
+function saveNum(n){localStorage.setItem('gmc_inv_n',String(n));}
+function today(){return new Date().toISOString().slice(0,10);}
+function fmt(n){return '$'+n.toFixed(2);}
+
+function buildTable(tbId){
+  const tb=document.getElementById(tbId);
+  tb.innerHTML='';
+
+  const sheetPrice=parseFloat(document.getElementById('cSheet').value)||0;
+  const cuts=parseInt(document.getElementById('cCuts').value)||0;
+  const cutFee=cuts*20;
+
+  // AUTO ROW 1: Sheet
+  if(sheetPrice>0){
+    const tr=document.createElement('tr');
+    tr.style.background='#fffdf5';
+    tr.innerHTML=
+      `<td><input type="text" value="${sheetDesc}" placeholder="e.g. Clear 1/8&quot; — 116×55.5cm" oninput="sheetDesc=this.value;syncDesc()" style="width:100%"></td>`+
+      `<td style="text-align:center;color:#555">1</td>`+
+      `<td style="text-align:right;color:#1A3A5C;font-weight:600">${fmt(sheetPrice)}</td>`+
+      `<td style="text-align:right;font-weight:700;color:#1A3A5C" id="a_sheet_${tbId}">${fmt(sheetPrice)}</td>`;
+    tb.appendChild(tr);
+  }
+
+  // AUTO ROW 2: Cut Fee
+  if(cuts>0){
+    const tr=document.createElement('tr');
+    tr.style.background='#fffdf5';
+    tr.innerHTML=
+      `<td style="color:#555;font-style:italic">Cut Fee</td>`+
+      `<td style="text-align:center;color:#555">${cuts}</td>`+
+      `<td style="text-align:right;color:#555">$20.00</td>`+
+      `<td style="text-align:right;font-weight:700;color:#C8960C">${fmt(cutFee)}</td>`;
+    tb.appendChild(tr);
+  }
+
+  // MANUAL ROWS
+  rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=
+      `<td><input type="text" value="${r.desc}" placeholder="Description" oninput="rows[${i}].desc=this.value"></td>`+
+      `<td><input type="number" value="${r.qty||''}" min="1" placeholder="1" oninput="rows[${i}].qty=this.value;recalc()" style="text-align:center;width:40px"></td>`+
+      `<td><input type="number" value="${r.price||''}" step="0.01" min="0" placeholder="0.00" oninput="rows[${i}].price=this.value;recalc()" style="text-align:right;width:55px"></td>`+
+      `<td id="a_${tbId}_${i}" style="text-align:right">—</td>`;
+    tb.appendChild(tr);
+  });
 }
 
-function newInvoice() {
-  if (hasData() && !confirm('Start new invoice? Current data will be lost.\nNouvelle facture? Les données actuelles seront perdues.')) return;
-  const next = getInvNum() + 1;
-  setInvNum(next);
-  showNum(next);
-  clearFields(true);
-  const today = new Date();
-  const dd = String(today.getDate()).padStart(2,'0');
-  const mm = String(today.getMonth()+1).padStart(2,'0');
-  document.getElementById('f-date').value = `${dd}/${mm}/${today.getFullYear()}`;
-  syncField(document.getElementById('f-date'));
-}
-
-function hasData() {
-  return ['f-soldto','f-date'].some(id => document.getElementById(id)?.value?.trim());
-}
-
-function syncField(el) {
-  const mirror = FIELD_MAP[el.id];
-  if (mirror) document.getElementById(mirror).value = el.value;
-}
-
-function buildRows() {
-  ['tbody-1','tbody-2'].forEach((id, ci) => {
-    const tbody = document.getElementById(id);
-    for (let i = 0; i < ROWS; i++) {
-      const ro = ci === 1 ? 'readonly' : '';
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><input id="r${i}-qty" ${ro} oninput="updateRow(${i})"></td>
-        <td class="desc"><input id="r${i}-desc" ${ro} style="text-align:left"></td>
-        <td><input id="r${i}-price" ${ro} oninput="updateRow(${i})" type="number" step="0.01" min="0"></td>
-        <td><input id="r${i}-unit" ${ro}></td>
-        <td><input id="r${i}-amt" readonly style="font-weight:600;color:#1A3A5C"></td>
-      `;
-      tbody.appendChild(tr);
+function syncDesc(){
+  // sync sheet description to other copy
+  ['tb1','tb2'].forEach(id=>{
+    const tb=document.getElementById(id);
+    if(tb&&tb.rows[0]){
+      const inp=tb.rows[0].querySelector('input[type=text]');
+      if(inp&&inp.value!==sheetDesc)inp.value=sheetDesc;
     }
   });
 }
 
-function updateRow(i) {
-  const qty = parseFloat(document.getElementById(`r${i}-qty`)?.value) || 0;
-  const price = parseFloat(document.getElementById(`r${i}-price`)?.value) || 0;
-  const amt = qty * price;
-  document.getElementById(`r${i}-amt`).value = amt > 0 ? '$' + amt.toFixed(2) : '';
-  syncCopy2Row(i);
-  calcTotals();
-}
+function rebuildAll(){buildTable('tb1');buildTable('tb2');recalc();}
 
-function syncCopy2Row(i) {
-  const tbody1 = document.getElementById('tbody-1');
-  const tbody2 = document.getElementById('tbody-2');
-  if (!tbody1 || !tbody2) return;
-  const row1 = tbody1.rows[i];
-  const row2 = tbody2.rows[i];
-  if (!row1 || !row2) return;
-  row1.querySelectorAll('input').forEach((el, j) => {
-    row2.querySelectorAll('input')[j].value = el.value;
+function recalc(){
+  let manualSub=0;
+  rows.forEach((r,i)=>{
+    const q=parseFloat(r.qty)||1;
+    const p=parseFloat(r.price)||0;
+    const amt=r.price===''?0:q*p;
+    manualSub+=amt;
+    const v=amt>0?fmt(amt):'—';
+    ['tb1','tb2'].forEach(id=>{
+      const el=document.getElementById('a_'+id+'_'+i);
+      if(el)el.textContent=v;
+    });
+  });
+
+  const sheetPrice=parseFloat(document.getElementById('cSheet').value)||0;
+  const cuts=parseInt(document.getElementById('cCuts').value)||0;
+  const cutFee=cuts*20;
+  const sub=manualSub+sheetPrice+cutFee;
+  const tps=sub*0.05;
+  const tvq=sub*0.09975;
+  const total=sub+tps+tvq;
+
+  [1,2].forEach(c=>{
+    document.getElementById('sub'+c).textContent=fmt(sub);
+    document.getElementById('tps'+c).textContent=fmt(tps);
+    document.getElementById('tvq'+c).textContent=fmt(tvq);
+    document.getElementById('tot'+c).textContent=fmt(total);
   });
 }
 
-function calcTotals() {
-  const tbody1 = document.getElementById('tbody-1');
-  let subtotal = 0;
-  tbody1.querySelectorAll('tr').forEach(row => {
-    const amtEl = row.querySelectorAll('input')[4];
-    const raw = (amtEl?.value || '').replace('$','');
-    subtotal += parseFloat(raw) || 0;
+function updateMeta(){
+  const num='#'+document.getElementById('cNum').value;
+  const date=document.getElementById('cDate').value;
+  const cust=document.getElementById('cCust').value||'—';
+  const phone=document.getElementById('cPhone').value;
+  const pay=document.getElementById('cPay').value;
+  const notes=document.getElementById('cNotes').value||'—';
+  [1,2].forEach(c=>{
+    document.getElementById('dNum'+c).textContent=num;
+    document.getElementById('dDate'+c).textContent=date;
+    document.getElementById('dCust'+c).textContent=cust;
+    document.getElementById('dPhone'+c).textContent=phone;
+    document.getElementById('dPay'+c).textContent=pay;
+    document.getElementById('dNotes'+c).textContent=notes;
   });
-  const tps = subtotal * 0.05;
-  const tvq = subtotal * 0.09975;
-  const total = subtotal + tps + tvq;
-  const fmt = v => v > 0 ? '$' + v.toFixed(2) : '';
-  ['f-tps','m-tps'].forEach(id => document.getElementById(id).value = fmt(tps));
-  ['f-tvq','m-tvq'].forEach(id => document.getElementById(id).value = fmt(tvq));
-  ['f-total','m-total'].forEach(id => document.getElementById(id).value = fmt(total));
 }
 
-function clearFields(skipConfirm) {
-  if (!skipConfirm && !confirm('Clear all fields? / Effacer tous les champs?')) return;
-  document.querySelectorAll('input').forEach(el => { el.value = ''; });
+function newInv(){
+  const n=getNum()+1;
+  saveNum(n);
+  document.getElementById('cNum').value=n;
+  document.getElementById('cCust').value='';
+  document.getElementById('cPhone').value='';
+  document.getElementById('cNotes').value='';
+  document.getElementById('cSheet').value='';
+  document.getElementById('cCuts').value=0;
+  document.getElementById('cPay').value='💵 Cash';
+  rows=Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
+  sheetDesc='';
+  rebuildAll();updateMeta();
 }
 
-buildRows();
-showNum(getInvNum());
-const today = new Date();
-const dd = String(today.getDate()).padStart(2,'0');
-const mm = String(today.getMonth()+1).padStart(2,'0');
-document.getElementById('f-date').value = `${dd}/${mm}/${today.getFullYear()}`;
-syncField(document.getElementById('f-date'));
+// Init
+document.getElementById('cNum').value=getNum();
+document.getElementById('cDate').value=today();
+['cNum','cDate','cCust','cPhone','cNotes'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{updateMeta();}));
+document.getElementById('cPay').addEventListener('change',updateMeta);
+document.getElementById('cSheet').addEventListener('input',rebuildAll);
+document.getElementById('cCuts').addEventListener('input',rebuildAll);
+rebuildAll();updateMeta();
 </script>
 </body>
 </html>

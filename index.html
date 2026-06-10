@@ -210,7 +210,7 @@ const FB='https://gmc-plexiglass-default-rtdb.firebaseio.com';
 let rows=Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
 let sheetDesc='';
 
-function getNum(){return parseInt(localStorage.getItem('gmc_inv_n')||'138656');}
+function getNum(){return parseInt(localStorage.getItem('gmc_inv_n')||'138657');}
 function saveNum(n){localStorage.setItem('gmc_inv_n',String(n));}
 function today(){return new Date().toISOString().slice(0,10);}
 function fmt(n){return '$'+parseFloat(n||0).toFixed(2);}
@@ -400,9 +400,9 @@ function showTab(name){
   if(name==='archive')renderArchive();
 }
 
-// Init — auto increment on load
-const n=getNum()+1;saveNum(n);
-document.getElementById('cNum').value=n;
+// Init — show current number without auto-incrementing
+if(getNum()<138657)saveNum(138657);
+document.getElementById('cNum').value=getNum();
 document.getElementById('cDate').value=today();
 ['cNum','cDate','cCust','cPhone','cNotes'].forEach(id=>document.getElementById(id).addEventListener('input',updateMeta));
 document.getElementById('cPay').addEventListener('change',updateMeta);

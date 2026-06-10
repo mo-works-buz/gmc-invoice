@@ -7,7 +7,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
-.screen-controls{background:#1A3A5C;color:#fff;border-radius:10px;padding:14px 18px;margin-bottom:22px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.screen-controls{background:#1A3A5C;color:#fff;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
 .sc-group{display:flex;flex-direction:column;gap:3px}
 .sc-group label{font-size:.68rem;font-weight:700;text-transform:uppercase;color:#aac4e0;letter-spacing:.5px}
 .sc-group input,.sc-group select{padding:6px 9px;border:1px solid #3a5a7c;border-radius:5px;font-size:.83rem;background:#0d2035;color:#fff;outline:none;width:100%}
@@ -16,11 +16,37 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 .sc-btn{padding:8px 18px;border:none;border-radius:6px;cursor:pointer;font-size:.83rem;font-weight:700;margin-top:auto}
 .sc-btn.print{background:#C8960C;color:#fff}
 .sc-btn.new{background:#2a5a2a;color:#fff}
+.sc-btn.save{background:#1565c0;color:#fff}
+.sc-btn:hover{opacity:.85}
+/* TABS */
+.tab-bar{display:flex;gap:0;margin-bottom:0;background:#15324f;border-radius:10px 10px 0 0;overflow:hidden}
+.tab-bar button{background:none;border:none;color:#8aa8c8;padding:11px 22px;cursor:pointer;font-size:.83rem;font-weight:700;border-bottom:3px solid transparent;transition:all .2s}
+.tab-bar button.active{color:#C8960C;border-bottom-color:#C8960C;background:rgba(255,255,255,.04)}
+.tab-bar button:hover{color:#fff}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+/* ARCHIVE */
+.archive-wrap{background:#fff;border-radius:0 0 10px 10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.archive-wrap h3{font-size:.9rem;font-weight:700;color:#1A3A5C;margin-bottom:14px}
+.arch-tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.arch-tbl th{background:#1A3A5C;color:#fff;padding:8px 10px;text-align:left;font-weight:600}
+.arch-tbl td{border-bottom:1px solid #f0f2f5;padding:7px 10px;vertical-align:middle}
+.arch-tbl tr:hover td{background:#f7f9fc;cursor:pointer}
+.arch-tbl .total-col{font-weight:700;color:#1A3A5C}
+.arch-tbl .pay-col{font-size:.75rem;color:#555}
+.badge-paid{display:inline-block;background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:700}
+.sync-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:.78rem;color:#555}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#4CAF50;flex-shrink:0}
+.sync-dot.off{background:#f44336}
+.arch-actions{display:flex;gap:6px}
+.btn-sm{padding:4px 10px;border:none;border-radius:5px;cursor:pointer;font-size:.72rem;font-weight:700}
+.btn-open{background:#1A3A5C;color:#fff}
+.btn-del{background:#ffebee;color:#c62828}
+.arch-empty{text-align:center;color:#aaa;padding:30px;font-size:.85rem}
+/* INVOICE */
 .page-wrap{display:flex;flex-direction:column;gap:28px}
-/* INVOICE COPY */
 .inv{background:#fff;width:210mm;margin:0 auto;padding:11mm 13mm 9mm;font-size:9pt;position:relative;box-shadow:0 3px 14px rgba(0,0,0,.18)}
 .copy-tag{position:absolute;top:7mm;right:7mm;background:#1A3A5C;color:#fff;font-size:6.5pt;font-weight:700;padding:2px 7px;border-radius:3px;letter-spacing:1px}
-/* HEADER */
 .inv-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:5mm;border-bottom:2.5px solid #1A3A5C;margin-bottom:5mm}
 .inv-logo{display:flex;align-items:center;gap:9px}
 .inv-badge{background:#C8960C;color:#1A3A5C;font-weight:900;font-size:10pt;width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center}
@@ -31,13 +57,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 .inv-num-block .lbl{font-size:7pt;color:#aaa;text-transform:uppercase;letter-spacing:1px}
 .inv-num-block .num{font-size:15pt;font-weight:800;color:#C8960C}
 .inv-num-block .dt{font-size:8pt;color:#555;margin-top:3px}
-/* META ROW */
 .meta-row{display:grid;grid-template-columns:30mm 1fr 32mm;gap:5px;margin-bottom:5mm}
 .meta-box{border:1px solid #e0e6ee;border-radius:5px;padding:4px 7px}
 .meta-box .ml{font-size:6.2pt;color:#aaa;text-transform:uppercase;font-weight:700;margin-bottom:2px}
 .meta-box .mv{font-size:8.5pt;color:#1A3A5C;font-weight:600}
 .meta-box .mv2{font-size:7.5pt;color:#888;margin-top:1px}
-/* ITEMS TABLE */
 .items-tbl{width:100%;border-collapse:collapse;margin-bottom:4mm}
 .items-tbl thead tr{background:#1A3A5C}
 .items-tbl thead th{color:#fff;padding:5px 7px;font-size:7.5pt;font-weight:600;text-align:left}
@@ -51,21 +75,15 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 .items-tbl tbody td:nth-child(2) input{text-align:center}
 .items-tbl tbody td:nth-child(3) input{text-align:right}
 .items-tbl tbody tr:last-child td{border-bottom:none}
-/* TOTALS */
 .totals-wrap{display:flex;justify-content:flex-end;margin-bottom:5mm}
 .totals-box{width:62mm}
 .t-row{display:flex;justify-content:space-between;padding:3px 0;font-size:8pt;color:#555;border-bottom:1px solid #f2f4f8}
-.t-row.cut-fee{color:#1A3A5C;font-weight:600;background:#fffbf0;padding:3px 4px;border-radius:3px;border-bottom:1px solid #ffe9a0}
 .t-row.grand{border-top:2px solid #1A3A5C;border-bottom:none;margin-top:4px;padding-top:5px;font-size:10.5pt;font-weight:800;color:#1A3A5C}
 .t-row.grand span:last-child{color:#C8960C}
-/* NOTES */
-.inv-notes{font-size:7.5pt;color:#666;border-top:1px solid #eee;padding-top:3mm;margin-bottom:3mm}
-.inv-notes strong{color:#333}
-/* FOOTER */
 .inv-footer{text-align:center;font-size:6.8pt;color:#bbb;border-top:1px solid #eee;padding-top:3mm}
 @media print{
   body{background:#fff;padding:0}
-  .screen-controls{display:none!important}
+  .screen-controls,.tab-bar,.archive-wrap{display:none!important}
   .page-wrap{gap:0}
   .inv{box-shadow:none;page-break-after:always;margin:0;width:100%}
   .inv:last-child{page-break-after:avoid}
@@ -92,205 +110,150 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
   <div class="sc-group" style="width:100px"><label>Sheet Price ($)</label><input id="cSheet" type="number" min="0" step="0.01" value="" placeholder="0.00"></div>
   <div class="sc-group" style="width:80px"><label>Cuts ($20 ea)</label><input id="cCuts" type="number" min="0" value="0" placeholder="0"></div>
   <div class="sc-group" style="width:180px"><label>Notes</label><input id="cNotes" type="text" placeholder="Optional"></div>
-  <button class="sc-btn print" onclick="window.print()">🖨 Print Both</button>
-  <button class="sc-btn new" onclick="newInv()">➕ New Invoice</button>
+  <button class="sc-btn save" onclick="saveInvoice()">💾 Save</button>
+  <button class="sc-btn print" onclick="window.print()">🖨 Print</button>
+  <button class="sc-btn new" onclick="newInv()">➕ New</button>
 </div>
 
-<div class="page-wrap">
-  <div class="inv" id="c1">
-    <div class="copy-tag">CLIENT COPY</div>
-    <div class="inv-header">
-      <div class="inv-logo">
-        <div class="inv-badge">GMC</div>
-        <div class="inv-co">
-          <div class="co-name">GMC Plexiglass</div>
-          <div class="co-city">Montreal, QC, Canada</div>
-          <div class="co-tax">TPS/GST: 732249932RT0001 &nbsp;|&nbsp; TVQ/QST: 1227484345TQ0001</div>
+<div class="tab-bar">
+  <button class="active" onclick="showTab('invoice')">🧾 Invoice</button>
+  <button onclick="showTab('archive')">📂 Archive</button>
+</div>
+
+<div class="tab-panel active" id="tab-invoice">
+  <div class="page-wrap">
+    <div class="inv" id="c1">
+      <div class="copy-tag">CLIENT COPY</div>
+      <div class="inv-header">
+        <div class="inv-logo">
+          <div class="inv-badge">GMC</div>
+          <div class="inv-co">
+            <div class="co-name">GMC Plexiglass</div>
+            <div class="co-city">Montreal, QC, Canada</div>
+            <div class="co-tax">TPS/GST: 732249932RT0001 &nbsp;|&nbsp; TVQ/QST: 1227484345TQ0001</div>
+          </div>
+        </div>
+        <div class="inv-num-block">
+          <div class="lbl">Invoice / Facture</div>
+          <div class="num" id="dNum1"></div>
+          <div class="dt" id="dDate1"></div>
         </div>
       </div>
-      <div class="inv-num-block">
-        <div class="lbl">Invoice / Facture</div>
-        <div class="num" id="dNum1"></div>
-        <div class="dt" id="dDate1"></div>
+      <div class="meta-row">
+        <div class="meta-box"><div class="ml">Bill To</div><div class="mv" id="dCust1">—</div><div class="mv2" id="dPhone1"></div></div>
+        <div class="meta-box"><div class="ml">Notes</div><div class="mv" id="dNotes1" style="font-size:8pt">—</div></div>
+        <div class="meta-box"><div class="ml">Payment</div><div class="mv" id="dPay1">💵 Cash</div></div>
       </div>
-    </div>
-    <div class="meta-row">
-      <div class="meta-box">
-        <div class="ml">Bill To / Facturer à</div>
-        <div class="mv" id="dCust1">—</div>
-        <div class="mv2" id="dPhone1"></div>
-      </div>
-      <div class="meta-box">
-        <div class="ml">Notes</div>
-        <div class="mv" id="dNotes1" style="font-size:8pt">—</div>
-      </div>
-      <div class="meta-box">
-        <div class="ml">Payment / Paiement</div>
-        <div class="mv" id="dPay1">💵 Cash</div>
-      </div>
-    </div>
-    <table class="items-tbl">
-      <thead><tr>
-        <th>Description / Description</th>
-        <th>Unit / Unité</th>
-        <th>Price / Prix</th>
-        <th>Amount / Montant</th>
-      </tr></thead>
-      <tbody id="tb1"></tbody>
-    </table>
-    <div class="totals-wrap">
-      <div class="totals-box">
+      <table class="items-tbl">
+        <thead><tr><th>Description</th><th>Unit</th><th>Price</th><th>Amount</th></tr></thead>
+        <tbody id="tb1"></tbody>
+      </table>
+      <div class="totals-wrap"><div class="totals-box">
         <div class="t-row"><span>Subtotal / Sous-total</span><span id="sub1">$0.00</span></div>
         <div class="t-row"><span>TPS / GST (5%)</span><span id="tps1">$0.00</span></div>
         <div class="t-row"><span>TVQ / QST (9.975%)</span><span id="tvq1">$0.00</span></div>
         <div class="t-row grand"><span>TOTAL</span><span id="tot1">$0.00</span></div>
-      </div>
+      </div></div>
+      <div class="inv-footer">Thank you for your business! — GMC Plexiglass &nbsp;|&nbsp; Merci pour votre confiance!</div>
     </div>
-    <div class="inv-footer">Thank you for your business! &nbsp;—&nbsp; GMC Plexiglass &nbsp;|&nbsp; Merci pour votre confiance!</div>
-  </div>
-
-  <div class="inv" id="c2">
-    <div class="copy-tag">MERCHANT COPY</div>
-    <div class="inv-header">
-      <div class="inv-logo">
-        <div class="inv-badge">GMC</div>
-        <div class="inv-co">
-          <div class="co-name">GMC Plexiglass</div>
-          <div class="co-city">Montreal, QC, Canada</div>
-          <div class="co-tax">TPS/GST: 732249932RT0001 &nbsp;|&nbsp; TVQ/QST: 1227484345TQ0001</div>
+    <div class="inv" id="c2">
+      <div class="copy-tag">MERCHANT COPY</div>
+      <div class="inv-header">
+        <div class="inv-logo">
+          <div class="inv-badge">GMC</div>
+          <div class="inv-co">
+            <div class="co-name">GMC Plexiglass</div>
+            <div class="co-city">Montreal, QC, Canada</div>
+            <div class="co-tax">TPS/GST: 732249932RT0001 &nbsp;|&nbsp; TVQ/QST: 1227484345TQ0001</div>
+          </div>
+        </div>
+        <div class="inv-num-block">
+          <div class="lbl">Invoice / Facture</div>
+          <div class="num" id="dNum2"></div>
+          <div class="dt" id="dDate2"></div>
         </div>
       </div>
-      <div class="inv-num-block">
-        <div class="lbl">Invoice / Facture</div>
-        <div class="num" id="dNum2"></div>
-        <div class="dt" id="dDate2"></div>
+      <div class="meta-row">
+        <div class="meta-box"><div class="ml">Bill To</div><div class="mv" id="dCust2">—</div><div class="mv2" id="dPhone2"></div></div>
+        <div class="meta-box"><div class="ml">Notes</div><div class="mv" id="dNotes2" style="font-size:8pt">—</div></div>
+        <div class="meta-box"><div class="ml">Payment</div><div class="mv" id="dPay2">💵 Cash</div></div>
       </div>
-    </div>
-    <div class="meta-row">
-      <div class="meta-box">
-        <div class="ml">Bill To / Facturer à</div>
-        <div class="mv" id="dCust2">—</div>
-        <div class="mv2" id="dPhone2"></div>
-      </div>
-      <div class="meta-box">
-        <div class="ml">Notes</div>
-        <div class="mv" id="dNotes2" style="font-size:8pt">—</div>
-      </div>
-      <div class="meta-box">
-        <div class="ml">Payment / Paiement</div>
-        <div class="mv" id="dPay2">💵 Cash</div>
-      </div>
-    </div>
-    <table class="items-tbl">
-      <thead><tr>
-        <th>Description / Description</th>
-        <th>Unit / Unité</th>
-        <th>Price / Prix</th>
-        <th>Amount / Montant</th>
-      </tr></thead>
-      <tbody id="tb2"></tbody>
-    </table>
-    <div class="totals-wrap">
-      <div class="totals-box">
+      <table class="items-tbl">
+        <thead><tr><th>Description</th><th>Unit</th><th>Price</th><th>Amount</th></tr></thead>
+        <tbody id="tb2"></tbody>
+      </table>
+      <div class="totals-wrap"><div class="totals-box">
         <div class="t-row"><span>Subtotal / Sous-total</span><span id="sub2">$0.00</span></div>
         <div class="t-row"><span>TPS / GST (5%)</span><span id="tps2">$0.00</span></div>
         <div class="t-row"><span>TVQ / QST (9.975%)</span><span id="tvq2">$0.00</span></div>
         <div class="t-row grand"><span>TOTAL</span><span id="tot2">$0.00</span></div>
-      </div>
+      </div></div>
+      <div class="inv-footer">Thank you for your business! — GMC Plexiglass &nbsp;|&nbsp; Merci pour votre confiance!</div>
     </div>
-    <div class="inv-footer">Thank you for your business! &nbsp;—&nbsp; GMC Plexiglass &nbsp;|&nbsp; Merci pour votre confiance!</div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-archive">
+  <div class="archive-wrap">
+    <div class="sync-bar"><div class="sync-dot off" id="archDot"></div><span id="archStatus">Connecting to Firebase...</span></div>
+    <h3>📂 Invoice Archive</h3>
+    <table class="arch-tbl">
+      <thead><tr><th>#</th><th>Date</th><th>Customer</th><th>Payment</th><th>Total</th><th></th></tr></thead>
+      <tbody id="archBody"></tbody>
+    </table>
   </div>
 </div>
 
 <script>
-const NROWS = 3; // manual rows
-let rows = Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
-let sheetDesc = ''; // editable description for sheet row
+const NROWS=3;
+const FB='https://gmc-plexiglass-default-rtdb.firebaseio.com';
+let rows=Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
+let sheetDesc='';
 
 function getNum(){return parseInt(localStorage.getItem('gmc_inv_n')||'138656');}
 function saveNum(n){localStorage.setItem('gmc_inv_n',String(n));}
 function today(){return new Date().toISOString().slice(0,10);}
-function fmt(n){return '$'+n.toFixed(2);}
+function fmt(n){return '$'+parseFloat(n||0).toFixed(2);}
 
 function buildTable(tbId){
-  const tb=document.getElementById(tbId);
-  tb.innerHTML='';
-
-  const sheetPrice=parseFloat(document.getElementById('cSheet').value)||0;
+  const tb=document.getElementById(tbId);tb.innerHTML='';
+  const sp=parseFloat(document.getElementById('cSheet').value)||0;
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
-  const cutFee=cuts*20;
-
-  // AUTO ROW 1: Sheet
-  if(sheetPrice>0){
-    const tr=document.createElement('tr');
-    tr.style.background='#fffdf5';
-    tr.innerHTML=
-      `<td><input type="text" value="${sheetDesc}" placeholder="e.g. Clear 1/8&quot; — 116×55.5cm" oninput="sheetDesc=this.value;syncDesc()" style="width:100%"></td>`+
-      `<td style="text-align:center;color:#555">1</td>`+
-      `<td style="text-align:right;color:#1A3A5C;font-weight:600">${fmt(sheetPrice)}</td>`+
-      `<td style="text-align:right;font-weight:700;color:#1A3A5C" id="a_sheet_${tbId}">${fmt(sheetPrice)}</td>`;
+  if(sp>0){
+    const tr=document.createElement('tr');tr.style.background='#fffdf5';
+    tr.innerHTML=`<td><input type="text" value="${sheetDesc}" placeholder="e.g. Clear 3/16&quot; — 46x22&quot;" oninput="sheetDesc=this.value;syncDesc()" style="width:100%"></td><td style="text-align:center;color:#555">1</td><td style="text-align:right;font-weight:600;color:#1A3A5C">${fmt(sp)}</td><td style="text-align:right;font-weight:700;color:#1A3A5C">${fmt(sp)}</td>`;
     tb.appendChild(tr);
   }
-
-  // AUTO ROW 2: Cut Fee
   if(cuts>0){
-    const tr=document.createElement('tr');
-    tr.style.background='#fffdf5';
-    tr.innerHTML=
-      `<td style="color:#555;font-style:italic">Cut Fee</td>`+
-      `<td style="text-align:center;color:#555">${cuts}</td>`+
-      `<td style="text-align:right;color:#555">$20.00</td>`+
-      `<td style="text-align:right;font-weight:700;color:#C8960C">${fmt(cutFee)}</td>`;
+    const tr=document.createElement('tr');tr.style.background='#fffdf5';
+    tr.innerHTML=`<td style="color:#555;font-style:italic">Cut Fee</td><td style="text-align:center;color:#555">${cuts}</td><td style="text-align:right;color:#555">$20.00</td><td style="text-align:right;font-weight:700;color:#C8960C">${fmt(cuts*20)}</td>`;
     tb.appendChild(tr);
   }
-
-  // MANUAL ROWS
   rows.forEach((r,i)=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=
-      `<td><input type="text" value="${r.desc}" placeholder="Description" oninput="rows[${i}].desc=this.value"></td>`+
-      `<td><input type="number" value="${r.qty||''}" min="1" placeholder="1" oninput="rows[${i}].qty=this.value;recalc()" style="text-align:center;width:40px"></td>`+
-      `<td><input type="number" value="${r.price||''}" step="0.01" min="0" placeholder="0.00" oninput="rows[${i}].price=this.value;recalc()" style="text-align:right;width:55px"></td>`+
-      `<td id="a_${tbId}_${i}" style="text-align:right">—</td>`;
+    tr.innerHTML=`<td><input type="text" value="${r.desc}" placeholder="Description" oninput="rows[${i}].desc=this.value"></td><td><input type="number" value="${r.qty||''}" min="1" placeholder="1" oninput="rows[${i}].qty=this.value;recalc()" style="text-align:center;width:40px"></td><td><input type="number" value="${r.price||''}" step="0.01" min="0" placeholder="0.00" oninput="rows[${i}].price=this.value;recalc()" style="text-align:right;width:55px"></td><td id="a_${tbId}_${i}" style="text-align:right">—</td>`;
     tb.appendChild(tr);
   });
 }
 
 function syncDesc(){
-  // sync sheet description to other copy
-  ['tb1','tb2'].forEach(id=>{
-    const tb=document.getElementById(id);
-    if(tb&&tb.rows[0]){
-      const inp=tb.rows[0].querySelector('input[type=text]');
-      if(inp&&inp.value!==sheetDesc)inp.value=sheetDesc;
-    }
-  });
+  ['tb1','tb2'].forEach(id=>{const tb=document.getElementById(id);if(tb&&tb.rows[0]){const inp=tb.rows[0].querySelector('input[type=text]');if(inp&&inp.value!==sheetDesc)inp.value=sheetDesc;}});
 }
 
 function rebuildAll(){buildTable('tb1');buildTable('tb2');recalc();}
 
 function recalc(){
-  let manualSub=0;
+  let ms=0;
   rows.forEach((r,i)=>{
-    const q=parseFloat(r.qty)||1;
-    const p=parseFloat(r.price)||0;
-    const amt=r.price===''?0:q*p;
-    manualSub+=amt;
+    const q=parseFloat(r.qty)||1,p=parseFloat(r.price)||0;
+    const amt=r.price===''?0:q*p;ms+=amt;
     const v=amt>0?fmt(amt):'—';
-    ['tb1','tb2'].forEach(id=>{
-      const el=document.getElementById('a_'+id+'_'+i);
-      if(el)el.textContent=v;
-    });
+    ['tb1','tb2'].forEach(id=>{const el=document.getElementById('a_'+id+'_'+i);if(el)el.textContent=v;});
   });
-
-  const sheetPrice=parseFloat(document.getElementById('cSheet').value)||0;
+  const sp=parseFloat(document.getElementById('cSheet').value)||0;
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
-  const cutFee=cuts*20;
-  const sub=manualSub+sheetPrice+cutFee;
-  const tps=sub*0.05;
-  const tvq=sub*0.09975;
-  const total=sub+tps+tvq;
-
+  const sub=ms+sp+cuts*20;
+  const tps=sub*.05,tvq=sub*.09975,total=sub+tps+tvq;
   [1,2].forEach(c=>{
     document.getElementById('sub'+c).textContent=fmt(sub);
     document.getElementById('tps'+c).textContent=fmt(tps);
@@ -316,9 +279,106 @@ function updateMeta(){
   });
 }
 
+function getCurrentData(){
+  const sp=parseFloat(document.getElementById('cSheet').value)||0;
+  const cuts=parseInt(document.getElementById('cCuts').value)||0;
+  const sub=sp+cuts*20+rows.reduce((s,r)=>{const q=parseFloat(r.qty)||1,p=parseFloat(r.price)||0;return s+(r.price===''?0:q*p);},0);
+  const total=sub*1.14975;
+  return {
+    num:document.getElementById('cNum').value,
+    date:document.getElementById('cDate').value,
+    customer:document.getElementById('cCust').value||'—',
+    phone:document.getElementById('cPhone').value,
+    payment:document.getElementById('cPay').value,
+    notes:document.getElementById('cNotes').value,
+    sheetPrice:sp,sheetDesc,cuts,rows:[...rows],
+    sub:+sub.toFixed(2),total:+total.toFixed(2),
+    savedAt:new Date().toISOString()
+  };
+}
+
+function loadData(d){
+  document.getElementById('cNum').value=d.num;
+  document.getElementById('cDate').value=d.date;
+  document.getElementById('cCust').value=d.customer==='—'?'':d.customer;
+  document.getElementById('cPhone').value=d.phone||'';
+  document.getElementById('cPay').value=d.payment||'💵 Cash';
+  document.getElementById('cNotes').value=d.notes||'';
+  document.getElementById('cSheet').value=d.sheetPrice||'';
+  document.getElementById('cCuts').value=d.cuts||0;
+  sheetDesc=d.sheetDesc||'';
+  rows=d.rows?d.rows.map(r=>({...r})):Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
+  rebuildAll();updateMeta();
+}
+
+// SAVE
+async function saveInvoice(){
+  const d=getCurrentData();
+  if(!d.num||d.customer==='—'){alert('Fill in Invoice # and Customer Name first.');return;}
+  // localStorage
+  const arch=JSON.parse(localStorage.getItem('gmc_inv_archive')||'{}');
+  arch[d.num]=d;
+  localStorage.setItem('gmc_inv_archive',JSON.stringify(arch));
+  // Firebase
+  try{
+    await fetch(FB+'/invoices/'+d.num+'.json',{method:'PUT',body:JSON.stringify(d),headers:{'Content-Type':'application/json'}});
+    setArchStatus(true);
+  }catch(e){setArchStatus(false);}
+  alert('✅ Invoice #'+d.num+' saved!');
+  renderArchive();
+}
+
+function setArchStatus(ok){
+  document.getElementById('archDot').className='sync-dot'+(ok?'':' off');
+  document.getElementById('archStatus').textContent=ok?'Synced with Firebase':'Firebase offline — saved locally';
+}
+
+// ARCHIVE
+async function loadArchive(){
+  // Try Firebase first
+  try{
+    const r=await fetch(FB+'/invoices.json');
+    const fb=await r.json();
+    if(fb){
+      // Merge with localStorage
+      const local=JSON.parse(localStorage.getItem('gmc_inv_archive')||'{}');
+      const merged={...local,...fb};
+      localStorage.setItem('gmc_inv_archive',JSON.stringify(merged));
+      setArchStatus(true);
+    }
+  }catch(e){setArchStatus(false);}
+  renderArchive();
+}
+
+function renderArchive(){
+  const arch=JSON.parse(localStorage.getItem('gmc_inv_archive')||'{}');
+  const tb=document.getElementById('archBody');
+  const entries=Object.values(arch).sort((a,b)=>b.num-a.num);
+  if(!entries.length){tb.innerHTML='<tr><td colspan="6"><div class="arch-empty">No saved invoices yet.</div></td></tr>';return;}
+  tb.innerHTML='';
+  entries.forEach(d=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:700;color:#C8960C">#${d.num}</td><td>${d.date}</td><td>${d.customer}</td><td class="pay-col">${d.payment||'—'}</td><td class="total-col">${fmt(d.total)}</td><td><div class="arch-actions"><button class="btn-sm btn-open" onclick="openArchiveInv('${d.num}')">📂 Open</button><button class="btn-sm btn-del" onclick="deleteArchiveInv('${d.num}')">🗑</button></div></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function openArchiveInv(num){
+  const arch=JSON.parse(localStorage.getItem('gmc_inv_archive')||'{}');
+  if(arch[num]){loadData(arch[num]);showTab('invoice');}
+}
+
+async function deleteArchiveInv(num){
+  if(!confirm('Delete invoice #'+num+'?'))return;
+  const arch=JSON.parse(localStorage.getItem('gmc_inv_archive')||'{}');
+  delete arch[num];
+  localStorage.setItem('gmc_inv_archive',JSON.stringify(arch));
+  try{await fetch(FB+'/invoices/'+num+'.json',{method:'DELETE'});}catch(e){}
+  renderArchive();
+}
+
 function newInv(){
-  const n=getNum()+1;
-  saveNum(n);
+  const n=getNum()+1;saveNum(n);
   document.getElementById('cNum').value=n;
   document.getElementById('cCust').value='';
   document.getElementById('cPhone').value='';
@@ -329,16 +389,27 @@ function newInv(){
   rows=Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
   sheetDesc='';
   rebuildAll();updateMeta();
+  showTab('invoice');
 }
 
-// Init
-document.getElementById('cNum').value=getNum();
+function showTab(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.tab-bar button')[name==='invoice'?0:1].classList.add('active');
+  if(name==='archive')renderArchive();
+}
+
+// Init — auto increment on load
+const n=getNum()+1;saveNum(n);
+document.getElementById('cNum').value=n;
 document.getElementById('cDate').value=today();
-['cNum','cDate','cCust','cPhone','cNotes'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{updateMeta();}));
+['cNum','cDate','cCust','cPhone','cNotes'].forEach(id=>document.getElementById(id).addEventListener('input',updateMeta));
 document.getElementById('cPay').addEventListener('change',updateMeta);
 document.getElementById('cSheet').addEventListener('input',rebuildAll);
 document.getElementById('cCuts').addEventListener('input',rebuildAll);
 rebuildAll();updateMeta();
+loadArchive();
 </script>
 </body>
 </html>

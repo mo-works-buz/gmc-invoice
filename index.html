@@ -400,8 +400,8 @@ function showTab(name){
   if(name==='archive')renderArchive();
 }
 
-// Init — show current number without auto-incrementing
-if(getNum()<138657)saveNum(138657);
+// Init — one-time reset to correct starting number
+if(!localStorage.getItem('gmc_inv_reset_v1')){saveNum(138657);localStorage.setItem('gmc_inv_reset_v1','1');}
 document.getElementById('cNum').value=getNum();
 document.getElementById('cDate').value=today();
 ['cNum','cDate','cCust','cPhone','cNotes'].forEach(id=>document.getElementById(id).addEventListener('input',updateMeta));

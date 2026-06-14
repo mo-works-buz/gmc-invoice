@@ -271,27 +271,10 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
       <div class="co-status ready inactive" onclick="coSetStatus('ready')">✅ Ready</div>
       <div class="co-status picked inactive" onclick="coSetStatus('picked')">📦 Picked Up</div>
     </div>
-    <div class="co-section-title">Workflow Tracking</div>
-    <div class="co-workflow">
-      <div class="co-wf-row">
-        <div class="co-field"><label>Cut By</label><input type="text" id="coWfCutBy" placeholder="Employee name"></div>
-        <div class="co-field"><label>Cut Date</label><input type="date" id="coWfCutDate"></div>
-        <div class="co-field"><label>Cut Time</label><input type="time" id="coWfCutTime"></div>
-      </div>
-      <div class="co-wf-row">
-        <div class="co-field"><label>Client Advised By</label><input type="text" id="coWfAdvBy" placeholder="Employee name"></div>
-        <div class="co-field"><label>Advised Date</label><input type="date" id="coWfAdvDate"></div>
-        <div class="co-field"><label>Advised Time</label><input type="time" id="coWfAdvTime"></div>
-      </div>
-      <div class="co-wf-row">
-        <div class="co-field"><label>Client ETA Date</label><input type="date" id="coWfEtaDate"></div>
-        <div class="co-field"><label>Client ETA Time</label><input type="time" id="coWfEtaTime"></div>
-        <div class="co-field"><label>Picked Up Date</label><input type="date" id="coWfPickDate"></div>
-      </div>
-      <div class="co-grid-row" style="margin-top:8px">
-        <div class="co-field"><label>Payment</label>
-          <select id="coWfPay"><option>💵 Cash</option><option>💳 Credit Card</option><option>🏧 Debit Card</option><option>📱 E-Transfer</option><option>🖊 Cheque</option></select>
-        </div>
+    <div class="co-grid-row">
+      <div class="co-field"><label>Pickup Date</label><input type="date" id="coWfPickDate"></div>
+      <div class="co-field"><label>Payment</label>
+        <select id="coWfPay"><option>💵 Cash</option><option>💳 Credit Card</option><option>🏧 Debit Card</option><option>📱 E-Transfer</option><option>🖊 Cheque</option></select>
       </div>
     </div>
     <div class="co-btn-row">

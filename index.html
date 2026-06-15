@@ -242,7 +242,9 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
       <div class="co-field"><label>Order Date</label><input type="date" id="coDate"></div>
       <div class="co-field"><label>Client Name</label><input type="text" id="coClient" placeholder="Client name"></div>
       <div class="co-field"><label>Tel No</label><input type="text" id="coTel" placeholder="514-xxx-xxxx"></div>
-      <div class="co-field"><label>Agreed Price ($)</label><input type="number" id="coPrice" step="0.01" min="0" placeholder="0.00"></div>
+      <div class="co-field"><label>Qty (pieces)</label><input type="number" id="coQty" min="1" value="1" oninput="coCalcTotal()"></div>
+      <div class="co-field"><label>Price per piece ($)</label><input type="number" id="coPrice" step="0.01" min="0" placeholder="0.00" oninput="coCalcTotal()"></div>
+      <div class="co-field"><label>Total ($)</label><input type="text" id="coTotal" readonly style="background:#f0f4f8;font-weight:700;color:#C8960C"></div>
     </div>
     <div class="co-section-title" style="margin-top:0">Dimensions</div>
     <div class="co-grid-row">
@@ -497,6 +499,13 @@ function showTab(name){
 }
 
 // ============ CUT ORDER ============
+function coCalcTotal(){
+  const qty=parseInt(document.getElementById('coQty').value)||1;
+  const price=parseFloat(document.getElementById('coPrice').value)||0;
+  const total=qty*price;
+  document.getElementById('coTotal').value=total>0?'$'+total.toFixed(2)+' + tax':'';
+}
+
 function parseDim(val){
   if(!val)return 0;
   val=val.trim();
@@ -570,6 +579,7 @@ function getCutOrderData(){
     date:document.getElementById('coDate').value,
     client:document.getElementById('coClient').value,
     tel:document.getElementById('coTel').value,
+    qty:document.getElementById('coQty').value||1,
     price:document.getElementById('coPrice').value,
     width:document.getElementById('coW').value,
     height:document.getElementById('coH').value,
@@ -622,7 +632,9 @@ function openCutOrder(num){
   document.getElementById('coH').value=d.height||'';
   document.getElementById('coThick').value=d.thickness||'3mm';
   document.getElementById('coNotes').value=d.notes||'';
+  document.getElementById('coQty').value=d.qty||1;
   document.getElementById('coWfPickDate').value=d.wfPickDate||'';
+  coCalcTotal();
   document.getElementById('coWfPay').value=d.payment||'💵 Cash';
   document.querySelectorAll('input[name="coMat"]').forEach(r=>{if(r.value===d.material)r.checked=true;});
   document.getElementById('coCutNum').textContent='#'+num;
@@ -666,7 +678,8 @@ function printCutOrder(){
   </div>
   <table><tr><th>Client</th><td>${d.client||'—'}</td><th>Tel</th><td>${d.tel||'—'}</td><th>Payment</th><td>${d.payment||'—'}</td></tr>
   <tr><th>Material</th><td>${d.material||'—'}</td><th>Thickness</th><td>${d.thickness||'—'}</td><th>Price</th><td>$${d.price||'0'} + Taxes</td></tr>
-  <tr><th>Width</th><td>${d.width||'—'}"</td><th>Height</th><td>${d.height||'—'}"</td><th>Notes</th><td>${d.notes||'—'}</td></tr></table>
+  <tr><th>Width</th><td>${d.width||'—'}"</td><th>Height</th><td>${d.height||'—'}"</td><th>Qty</th><td>${d.qty||1} piece(s)</td></tr>
+  <tr><th>Notes</th><td colspan="5">${d.notes||'—'}</td></tr></table>
   <div style="font-size:7pt;color:#888;margin:4px 0">Visual Preview (1 cell = 0.5")</div>
   <div class="grid" id="pg"></div>
   <div class="wf" style="margin-top:10px">

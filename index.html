@@ -317,7 +317,8 @@ function buildTable(tbId){
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
   if(sp>0){
     const tr=document.createElement('tr');tr.style.background='#fffdf5';
-    tr.innerHTML=`<td><input type="text" value="${sheetDesc}" placeholder="e.g. Clear 3/16&quot; — 46x22&quot;" oninput="sheetDesc=this.value;syncDesc()" style="width:100%"></td><td><input type="number" value="${sheetQty}" min="1" style="text-align:center;width:40px" oninput="sheetQty=parseInt(this.value)||1;recalc()"></td><td style="text-align:right;font-weight:600;color:#1A3A5C">${fmt(sp)}</td><td style="text-align:right;font-weight:700;color:#1A3A5C">${fmt(sp*sheetQty)}</td>`;
+    const syncQ=tbId==='tb1'?`const e2=document.getElementById('sheetQtyIn_tb2');if(e2)e2.value=sheetQty;`:'';
+    tr.innerHTML=`<td><input type="text" value="${sheetDesc}" placeholder="e.g. Clear 3/16&quot; — 46x22&quot;" oninput="sheetDesc=this.value;syncDesc()" style="width:100%"></td><td><input type="number" id="sheetQtyIn_${tbId}" value="${sheetQty}" min="1" style="text-align:center;width:40px" oninput="sheetQty=parseInt(this.value)||1;${syncQ}recalc()"></td><td style="text-align:right;font-weight:600;color:#1A3A5C">${fmt(sp)}</td><td id="sheetAmt_${tbId}" style="text-align:right;font-weight:700;color:#1A3A5C">${fmt(sp*sheetQty)}</td>`;
     tb.appendChild(tr);
   }
   if(cuts>0){
@@ -327,7 +328,13 @@ function buildTable(tbId){
   }
   rows.forEach((r,i)=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td><input type="text" value="${r.desc}" placeholder="Description" oninput="rows[${i}].desc=this.value"></td><td><input type="number" value="${r.qty||''}" min="1" placeholder="1" oninput="rows[${i}].qty=this.value;recalc()" style="text-align:center;width:40px"></td><td><input type="number" value="${r.price||''}" step="0.01" min="0" placeholder="0.00" oninput="rows[${i}].price=this.value;recalc()" style="text-align:right;width:55px"></td><td id="a_${tbId}_${i}" style="text-align:right">—</td>`;
+    const s1=tbId==='tb1'?`const e=document.getElementById('rD2_${i}');if(e)e.value=this.value;`:'';
+    const s2=tbId==='tb1'?`const e=document.getElementById('rQ2_${i}');if(e)e.value=this.value;`:'';
+    const s3=tbId==='tb1'?`const e=document.getElementById('rP2_${i}');if(e)e.value=this.value;`:'';
+    const dId=tbId==='tb2'?`id="rD2_${i}"`:'';
+    const qId=tbId==='tb2'?`id="rQ2_${i}"`:'';
+    const pId=tbId==='tb2'?`id="rP2_${i}"`:'';
+    tr.innerHTML=`<td><input type="text" ${dId} value="${r.desc}" placeholder="Description" oninput="rows[${i}].desc=this.value;${s1}"></td><td><input type="number" ${qId} value="${r.qty||''}" min="1" placeholder="1" oninput="rows[${i}].qty=this.value;${s2}recalc()" style="text-align:center;width:40px"></td><td><input type="number" ${pId} value="${r.price||''}" step="0.01" min="0" placeholder="0.00" oninput="rows[${i}].price=this.value;${s3}recalc()" style="text-align:right;width:55px"></td><td id="a_${tbId}_${i}" style="text-align:right">—</td>`;
     tb.appendChild(tr);
   });
 }
@@ -348,7 +355,10 @@ function recalc(){
   });
   const sp=parseFloat(document.getElementById('cSheet').value)||0;
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
-  const sub=ms+(sp*sheetQty)+cuts*20;
+  const sheetAmt=sp*sheetQty;
+  const el1=document.getElementById('sheetAmt_tb1');if(el1)el1.textContent=fmt(sheetAmt);
+  const el2=document.getElementById('sheetAmt_tb2');if(el2)el2.textContent=fmt(sheetAmt);
+  const sub=ms+sheetAmt+cuts*20;
   const tps=sub*.05,tvq=sub*.09975,total=sub+tps+tvq;
   [1,2].forEach(c=>{
     document.getElementById('sub'+c).textContent=fmt(sub);

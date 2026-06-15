@@ -577,14 +577,6 @@ function getCutOrderData(){
     notes:document.getElementById('coNotes').value,
     material:mat==='Other'?matOther:mat,
     status:coCurrentStatus,
-    wfCutBy:document.getElementById('coWfCutBy').value,
-    wfCutDate:document.getElementById('coWfCutDate').value,
-    wfCutTime:document.getElementById('coWfCutTime').value,
-    wfAdvBy:document.getElementById('coWfAdvBy').value,
-    wfAdvDate:document.getElementById('coWfAdvDate').value,
-    wfAdvTime:document.getElementById('coWfAdvTime').value,
-    wfEtaDate:document.getElementById('coWfEtaDate').value,
-    wfEtaTime:document.getElementById('coWfEtaTime').value,
     wfPickDate:document.getElementById('coWfPickDate').value,
     payment:document.getElementById('coWfPay').value,
     savedAt:new Date().toISOString()
@@ -630,14 +622,6 @@ function openCutOrder(num){
   document.getElementById('coH').value=d.height||'';
   document.getElementById('coThick').value=d.thickness||'3mm';
   document.getElementById('coNotes').value=d.notes||'';
-  document.getElementById('coWfCutBy').value=d.wfCutBy||'';
-  document.getElementById('coWfCutDate').value=d.wfCutDate||'';
-  document.getElementById('coWfCutTime').value=d.wfCutTime||'';
-  document.getElementById('coWfAdvBy').value=d.wfAdvBy||'';
-  document.getElementById('coWfAdvDate').value=d.wfAdvDate||'';
-  document.getElementById('coWfAdvTime').value=d.wfAdvTime||'';
-  document.getElementById('coWfEtaDate').value=d.wfEtaDate||'';
-  document.getElementById('coWfEtaTime').value=d.wfEtaTime||'';
   document.getElementById('coWfPickDate').value=d.wfPickDate||'';
   document.getElementById('coWfPay').value=d.payment||'💵 Cash';
   document.querySelectorAll('input[name="coMat"]').forEach(r=>{if(r.value===d.material)r.checked=true;});
@@ -686,9 +670,7 @@ function printCutOrder(){
   <div style="font-size:7pt;color:#888;margin:4px 0">Visual Preview (1 cell = 0.5")</div>
   <div class="grid" id="pg"></div>
   <div class="wf" style="margin-top:10px">
-    <div class="wf-row"><div><div class="wf-label">Cut By</div><div>${d.wfCutBy||'___________'}</div></div><div><div class="wf-label">Date</div><div>${d.wfCutDate||'___________'}</div></div><div><div class="wf-label">Time</div><div>${d.wfCutTime||'___________'}</div></div></div>
-    <div class="wf-row"><div><div class="wf-label">Client Advised By</div><div>${d.wfAdvBy||'___________'}</div></div><div><div class="wf-label">Date</div><div>${d.wfAdvDate||'___________'}</div></div><div><div class="wf-label">Time</div><div>${d.wfAdvTime||'___________'}</div></div></div>
-    <div class="wf-row"><div><div class="wf-label">Client ETA</div><div>${d.wfEtaDate||'___________'} ${d.wfEtaTime||''}</div></div><div><div class="wf-label">Picked Up</div><div>${d.wfPickDate||'___________'}</div></div></div>
+    <div class="wf-row"><div><div class="wf-label">Payment</div><div>${d.payment||'—'}</div></div><div><div class="wf-label">Pickup Date</div><div>${d.wfPickDate||'___________'}</div></div></div>
   </div>
   <script>
     const g=document.getElementById('pg');const COLS=27,ROWS=13;

@@ -304,6 +304,7 @@ const NROWS=3;
 const FB='https://gmc-plexiglass-default-rtdb.firebaseio.com';
 let rows=Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
 let sheetDesc='';
+let sheetQty=1;
 
 function getNum(){return parseInt(localStorage.getItem('gmc_inv_n')||'138657');}
 function saveNum(n){localStorage.setItem('gmc_inv_n',String(n));}
@@ -316,7 +317,7 @@ function buildTable(tbId){
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
   if(sp>0){
     const tr=document.createElement('tr');tr.style.background='#fffdf5';
-    tr.innerHTML=`<td><input type="text" value="${sheetDesc}" placeholder="e.g. Clear 3/16&quot; — 46x22&quot;" oninput="sheetDesc=this.value;syncDesc()" style="width:100%"></td><td style="text-align:center;color:#555">1</td><td style="text-align:right;font-weight:600;color:#1A3A5C">${fmt(sp)}</td><td style="text-align:right;font-weight:700;color:#1A3A5C">${fmt(sp)}</td>`;
+    tr.innerHTML=`<td><input type="text" value="${sheetDesc}" placeholder="e.g. Clear 3/16&quot; — 46x22&quot;" oninput="sheetDesc=this.value;syncDesc()" style="width:100%"></td><td><input type="number" value="${sheetQty}" min="1" style="text-align:center;width:40px" oninput="sheetQty=parseInt(this.value)||1;recalc()"></td><td style="text-align:right;font-weight:600;color:#1A3A5C">${fmt(sp)}</td><td style="text-align:right;font-weight:700;color:#1A3A5C">${fmt(sp*sheetQty)}</td>`;
     tb.appendChild(tr);
   }
   if(cuts>0){
@@ -347,7 +348,7 @@ function recalc(){
   });
   const sp=parseFloat(document.getElementById('cSheet').value)||0;
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
-  const sub=ms+sp+cuts*20;
+  const sub=ms+(sp*sheetQty)+cuts*20;
   const tps=sub*.05,tvq=sub*.09975,total=sub+tps+tvq;
   [1,2].forEach(c=>{
     document.getElementById('sub'+c).textContent=fmt(sub);
@@ -386,7 +387,7 @@ function getCurrentData(){
     phone:document.getElementById('cPhone').value,
     payment:document.getElementById('cPay').value,
     notes:document.getElementById('cNotes').value,
-    sheetPrice:sp,sheetDesc,cuts,rows:[...rows],
+    sheetPrice:sp,sheetDesc,sheetQty,cuts,rows:[...rows],
     sub:+sub.toFixed(2),total:+total.toFixed(2),
     savedAt:new Date().toISOString()
   };
@@ -402,6 +403,7 @@ function loadData(d){
   document.getElementById('cSheet').value=d.sheetPrice||'';
   document.getElementById('cCuts').value=d.cuts||0;
   sheetDesc=d.sheetDesc||'';
+  sheetQty=d.sheetQty||1;
   rows=d.rows?d.rows.map(r=>({...r})):Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
   rebuildAll();updateMeta();
 }
@@ -482,7 +484,7 @@ function newInv(){
   document.getElementById('cCuts').value=0;
   document.getElementById('cPay').value='💵 Cash';
   rows=Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
-  sheetDesc='';
+  sheetDesc='';sheetQty=1;
   rebuildAll();updateMeta();
   showTab('invoice');
 }

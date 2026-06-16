@@ -388,7 +388,7 @@ function updateMeta(){
 function getCurrentData(){
   const sp=parseFloat(document.getElementById('cSheet').value)||0;
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
-  const sub=sp+cuts*20+rows.reduce((s,r)=>{const q=parseFloat(r.qty)||1,p=parseFloat(r.price)||0;return s+(r.price===''?0:q*p);},0);
+  const sub=(sp*sheetQty)+cuts*20+rows.reduce((s,r)=>{const q=parseFloat(r.qty)||1,p=parseFloat(r.price)||0;return s+(r.price===''?0:q*p);},0);
   const total=sub*1.14975;
   return {
     num:document.getElementById('cNum').value,

@@ -146,9 +146,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
       <option value="🏧 Debit Card">🏧 Debit Card</option>
       <option value="📱 E-Transfer">📱 E-Transfer</option>
       <option value="🖊 Cheque">🖊 Cheque</option>
+      <option value="🌐 Online Order">🌐 Online Order</option>
     </select>
   </div>
-  <div class="sc-group" style="width:100px"><label>Sheet Price ($)</label><input id="cSheet" type="number" min="0" step="0.01" value="" placeholder="0.00"></div>
+  <div class="sc-group" style="width:100px"><label>Sheet Price ($)</label><input id="cSheet" type="number" min="0" step="0.01" value="" placeholder="0.00" oninput="rebuildAll()"></div>
+  <div class="sc-group" style="width:70px"><label>Sheet Qty</label><input id="cSheetQty" type="number" min="1" value="1" placeholder="1" oninput="sheetQty=parseInt(this.value)||1;rebuildAll()"></div>
   <div class="sc-group" style="width:80px"><label>Cuts ($20 ea)</label><input id="cCuts" type="number" min="0" value="0" placeholder="0"></div>
   <div class="sc-group" style="width:180px"><label>Notes</label><input id="cNotes" type="text" placeholder="Optional"></div>
   <button class="sc-btn save" onclick="saveInvoice()">💾 Save</button>
@@ -317,8 +319,7 @@ function buildTable(tbId){
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
   if(sp>0){
     const tr=document.createElement('tr');tr.style.background='#fffdf5';
-    const syncQ=tbId==='tb1'?`const e2=document.getElementById('sheetQtyIn_tb2');if(e2)e2.value=sheetQty;`:'';
-    tr.innerHTML=`<td><input type="text" value="${sheetDesc}" placeholder="e.g. Clear 3/16&quot; — 46x22&quot;" oninput="sheetDesc=this.value;syncDesc()" style="width:100%"></td><td><input type="number" id="sheetQtyIn_${tbId}" value="${sheetQty}" min="1" style="text-align:center;width:40px" oninput="sheetQty=parseInt(this.value)||1;${syncQ}recalc()"></td><td style="text-align:right;font-weight:600;color:#1A3A5C">${fmt(sp)}</td><td id="sheetAmt_${tbId}" style="text-align:right;font-weight:700;color:#1A3A5C">${fmt(sp*sheetQty)}</td>`;
+    tr.innerHTML=`<td><input type="text" value="${sheetDesc}" placeholder="e.g. Clear 3/16&quot; — 46x22&quot;" oninput="sheetDesc=this.value;syncDesc()" style="width:100%"></td><td style="text-align:center;font-weight:600;color:#1A3A5C">${sheetQty}</td><td style="text-align:right;font-weight:600;color:#1A3A5C">${fmt(sp)}</td><td id="sheetAmt_${tbId}" style="text-align:right;font-weight:700;color:#1A3A5C">${fmt(sp*sheetQty)}</td>`;
     tb.appendChild(tr);
   }
   if(cuts>0){
@@ -414,6 +415,7 @@ function loadData(d){
   document.getElementById('cCuts').value=d.cuts||0;
   sheetDesc=d.sheetDesc||'';
   sheetQty=d.sheetQty||1;
+  document.getElementById('cSheetQty').value=sheetQty;
   rows=d.rows?d.rows.map(r=>({...r})):Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
   rebuildAll();updateMeta();
 }
@@ -491,6 +493,7 @@ function newInv(){
   document.getElementById('cPhone').value='';
   document.getElementById('cNotes').value='';
   document.getElementById('cSheet').value='';
+  document.getElementById('cSheetQty').value=1;
   document.getElementById('cCuts').value=0;
   document.getElementById('cPay').value='💵 Cash';
   rows=Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));

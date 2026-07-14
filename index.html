@@ -437,9 +437,10 @@ async function saveInvoice(){
   localStorage.setItem('gmc_inv_archive',JSON.stringify(arch));
   // Firebase
   try{
-    await fetch(FB+'/invoices/'+d.num+'.json',{method:'PUT',body:JSON.stringify(d),headers:{'Content-Type':'application/json'}});
-    setArchStatus(true);
-  }catch(e){setArchStatus(false);}
+    const res=await fetch(FB+'/invoices/'+d.num+'.json',{method:'PUT',body:JSON.stringify(d),headers:{'Content-Type':'application/json'}});
+    if(res.ok){setArchStatus(true);}
+    else{const err=await res.text();setArchStatus(false);alert('⚠️ Firebase Error '+res.status+':\n'+err);return;}
+  }catch(e){setArchStatus(false);alert('⚠️ Network Error: '+e.message);return;}
   alert('✅ Invoice #'+d.num+' saved!');
   renderArchive();
 }

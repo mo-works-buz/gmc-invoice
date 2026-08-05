@@ -45,11 +45,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 .arch-empty{text-align:center;color:#aaa;padding:30px;font-size:.85rem}
 /* INVOICE */
 .page-wrap{display:flex;flex-direction:column;gap:28px}
-.inv{background:#fff;width:210mm;margin:0 auto;padding:11mm 13mm 9mm;font-size:9pt;position:relative;box-shadow:0 3px 14px rgba(0,0,0,.18)}
+.inv{background:#fff;width:210mm;margin:0 auto;padding:11mm 13mm 9mm;font-size:9pt;position:relative;box-shadow:0 3px 14px rgba(0,0,0,.18);overflow:hidden}
 .copy-tag{position:absolute;top:7mm;right:7mm;background:#1A3A5C;color:#fff;font-size:6.5pt;font-weight:700;padding:2px 7px;border-radius:3px;letter-spacing:1px}
 .inv-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:5mm;border-bottom:2.5px solid #1A3A5C;margin-bottom:5mm}
 .inv-logo{display:flex;align-items:center;gap:9px}
-.inv-badge{width:52px;height:52px;border-radius:50%;background:#1A1A1A;border:2.5px solid #FFEB3B;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative;box-shadow:0 0 0 1.5px #1A1A1A,0 2px 6px rgba(0,0,0,.25)}.inv-badge::before,.inv-badge::after{content:'●';position:absolute;color:#FFEB3B;font-size:4pt;font-weight:900}.inv-badge::before{top:3px;left:50%;transform:translateX(-50%)}.inv-badge::after{bottom:3px;right:3px}.inv-badge .gmc-text{font-weight:900;font-size:11pt;color:#FFEB3B;letter-spacing:-0.5px;line-height:1}.inv-badge .plexiglass{font-size:5pt;color:#fff;font-weight:700;background:#1A1A1A;border:1px solid #FFEB3B;padding:1px 4px;border-radius:2px;margin-top:2px;white-space:nowrap}
+.inv-badge{width:52px;height:52px;border-radius:7px;background:#FFEB3B;color:#1A1A1A;font-weight:900;font-size:10pt;display:inline-flex;align-items:center;justify-content:center}.inv-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:280px;height:280px;border-radius:50%;border:2px solid rgba(255,235,59,0.08);display:flex;align-items:center;justify-content:center;z-index:0;pointer-events:none}.inv-watermark-text{font-size:120px;color:rgba(255,235,59,0.06);font-weight:900;text-align:center;line-height:1}
 .inv-co .co-name{font-size:12.5pt;font-weight:800;color:#1A3A5C}
 .inv-co .co-city{font-size:7.5pt;color:#777;margin-top:1px}
 .inv-co .co-tax{font-size:6.8pt;color:#999;margin-top:3px}
@@ -167,10 +167,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 <div class="tab-panel active" id="tab-invoice">
   <div class="page-wrap">
     <div class="inv" id="c1">
+      <div class="inv-watermark"><div class="inv-watermark-text">GMC</div></div>
       <div class="copy-tag">CLIENT COPY</div>
       <div class="inv-header">
         <div class="inv-logo">
-          <div class="inv-badge"><div class="gmc-text">GMC</div><div class="plexiglass">Plexiglass</div></div>
+          <div class="inv-badge">GMC</div>
           <div class="inv-co">
             <div class="co-name">GMC Plexiglass</div>
             <div class="co-city">Montreal, QC, Canada</div>
@@ -201,10 +202,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
       <div class="inv-footer">Thank you for your business! — GMC Plexiglass &nbsp;|&nbsp; Merci pour votre confiance!</div>
     </div>
     <div class="inv" id="c2">
+      <div class="inv-watermark"><div class="inv-watermark-text">GMC</div></div>
       <div class="copy-tag">MERCHANT COPY</div>
       <div class="inv-header">
         <div class="inv-logo">
-          <div class="inv-badge"><div class="gmc-text">GMC</div><div class="plexiglass">Plexiglass</div></div>
+          <div class="inv-badge">GMC</div>
           <div class="inv-co">
             <div class="co-name">GMC Plexiglass</div>
             <div class="co-city">Montreal, QC, Canada</div>

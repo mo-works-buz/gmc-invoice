@@ -81,6 +81,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 .t-row{display:flex;justify-content:space-between;padding:3px 0;font-size:8pt;color:#555;border-bottom:1px solid #f2f4f8}
 .t-row.grand{border-top:2px solid #1A3A5C;border-bottom:none;margin-top:4px;padding-top:5px;font-size:10.5pt;font-weight:800;color:#1A3A5C}
 .t-row.grand span:last-child{color:#FFC107}
+.t-row.dep{color:#2e7d32;font-weight:700;border-bottom:1px solid #f2f4f8}
+.t-row.dep span:last-child{color:#2e7d32}
+.t-row.balance{border-top:2px solid #FFC107;border-bottom:none;margin-top:3px;padding-top:5px;font-size:10.5pt;font-weight:800;color:#1A3A5C}
+.t-row.balance span:last-child{color:#c62828}
+.t-row.subtle{font-size:7.5pt;color:#999}
 .inv-footer{text-align:center;font-size:6.8pt;color:#bbb;border-top:1px solid #eee;padding-top:3mm}
 /* CUT ORDER */
 .co-wrap{background:#fff;border-radius:0 0 10px 10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
@@ -153,6 +158,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
   <div class="sc-group" style="width:100px"><label>Sheet Price ($)</label><input id="cSheet" type="number" min="0" step="0.01" value="" placeholder="0.00" oninput="rebuildAll()"></div>
   <div class="sc-group" style="width:70px"><label>Sheet Qty</label><input id="cSheetQty" type="number" min="1" value="1" placeholder="1" oninput="sheetQty=parseInt(this.value)||1;rebuildAll()"></div>
   <div class="sc-group" style="width:80px"><label>Cuts ($20 ea)</label><input id="cCuts" type="number" min="0" value="0" placeholder="0"></div>
+  <div class="sc-group" style="width:100px"><label title="Deducted AFTER tax — does not reduce TPS/TVQ">Deposit ($)</label><input id="cDeposit" type="number" min="0" step="0.01" value="" placeholder="0.00" oninput="recalc()" style="border-color:#4CAF50"></div>
   <div class="sc-group" style="width:180px"><label>Notes</label><input id="cNotes" type="text" placeholder="Optional"></div>
   <button class="sc-btn save" onclick="saveInvoice()">💾 Save</button>
   <button class="sc-btn print" onclick="window.print()">🖨 Print</button>
@@ -172,7 +178,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
       <div class="copy-tag">CLIENT COPY</div>
       <div class="inv-header">
         <div class="inv-logo">
-          <div class="inv-badge"><img src="gmc-logo.jpg" alt="GMC" style="width:100%;height:auto;"></div>
+          <div class="inv-badge"><img src="gmc-logo.jpg" alt="GMC" style="width:100%;height:auto;" onerror="this.onerror=null;this.src='https://mo-works-buz.github.io/gmc-invoice/gmc-logo.jpg'"></div>
           <div class="inv-co">
             <div class="co-name">GMC Plexiglass</div>
             <div class="co-city">Montreal, QC, Canada</div>
@@ -199,6 +205,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
         <div class="t-row"><span>TPS / GST (5%)</span><span id="tps1">$0.00</span></div>
         <div class="t-row"><span>TVQ / QST (9.975%)</span><span id="tvq1">$0.00</span></div>
         <div class="t-row grand"><span>TOTAL</span><span id="tot1">$0.00</span></div>
+        <div class="t-row dep" id="depRow1" style="display:none"><span>Deposit Paid / Acompte versé</span><span id="dep1">-$0.00</span></div>
+        <div class="t-row balance" id="balRow1" style="display:none"><span>BALANCE DUE / SOLDE</span><span id="bal1">$0.00</span></div>
       </div></div>
       <div class="inv-footer">Thank you for your business! — GMC Plexiglass &nbsp;|&nbsp; Merci pour votre confiance!</div>
     </div>
@@ -207,7 +215,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
       <div class="copy-tag">MERCHANT COPY</div>
       <div class="inv-header">
         <div class="inv-logo">
-          <div class="inv-badge"><img src="gmc-logo.jpg" alt="GMC" style="width:100%;height:auto;"></div>
+          <div class="inv-badge"><img src="gmc-logo.jpg" alt="GMC" style="width:100%;height:auto;" onerror="this.onerror=null;this.src='https://mo-works-buz.github.io/gmc-invoice/gmc-logo.jpg'"></div>
           <div class="inv-co">
             <div class="co-name">GMC Plexiglass</div>
             <div class="co-city">Montreal, QC, Canada</div>
@@ -234,6 +242,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
         <div class="t-row"><span>TPS / GST (5%)</span><span id="tps2">$0.00</span></div>
         <div class="t-row"><span>TVQ / QST (9.975%)</span><span id="tvq2">$0.00</span></div>
         <div class="t-row grand"><span>TOTAL</span><span id="tot2">$0.00</span></div>
+        <div class="t-row dep" id="depRow2" style="display:none"><span>Deposit Paid / Acompte versé</span><span id="dep2">-$0.00</span></div>
+        <div class="t-row balance" id="balRow2" style="display:none"><span>BALANCE DUE / SOLDE</span><span id="bal2">$0.00</span></div>
       </div></div>
       <div class="inv-footer">Thank you for your business! — GMC Plexiglass &nbsp;|&nbsp; Merci pour votre confiance!</div>
     </div>
@@ -296,6 +306,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
       <button class="co-btn co-btn-print" onclick="printCutOrder()">🖨 Print Work Order</button>
     </div>
     <div class="co-section-title" style="margin-top:20px">📋 Cut Order Archive</div>
+    <div class="sync-bar"><div class="sync-dot off" id="coDot"></div><span id="coStatus">Connecting to Firebase...</span><button class="btn-sm btn-open" style="margin-left:auto" onclick="loadCoArchive()">🔄 Refresh</button></div>
     <table class="arch-tbl"><thead><tr><th>#</th><th>Date</th><th>Client</th><th>Dimensions</th><th>Status</th><th></th></tr></thead><tbody id="coArchBody"></tbody></table>
   </div>
 </div>
@@ -318,8 +329,20 @@ let rows=Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
 let sheetDesc='';
 let sheetQty=1;
 
-function getNum(){return parseInt(localStorage.getItem('gmc_inv_n')||'138657');}
-function saveNum(n){localStorage.setItem('gmc_inv_n',String(n));}
+/* FIX: escape values before injecting into HTML attributes.
+   Without this, any description containing a double quote (e.g. 44" x 80")
+   truncated the input value and silently lost the rest of the text. */
+function esc(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+}
+
+function getNum(){return localStorage.getItem('gmc_inv_n')||'138699';}
+function saveNum(n){if(n!==''&&n!=null)localStorage.setItem('gmc_inv_n',String(n));}
 function today(){return new Date().toISOString().slice(0,10);}
 function fmt(n){return '$'+parseFloat(n||0).toFixed(2);}
 
@@ -329,7 +352,7 @@ function buildTable(tbId){
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
   if(sp>0){
     const tr=document.createElement('tr');tr.style.background='#fffdf5';
-    tr.innerHTML=`<td><input type="text" value="${sheetDesc}" placeholder="e.g. Clear 3/16&quot; — 46x22&quot;" oninput="sheetDesc=this.value;syncDesc()" style="width:100%"></td><td style="text-align:center;font-weight:600;color:#1A3A5C">${sheetQty}</td><td style="text-align:right;font-weight:600;color:#1A3A5C">${fmt(sp)}</td><td id="sheetAmt_${tbId}" style="text-align:right;font-weight:700;color:#1A3A5C">${fmt(sp*sheetQty)}</td>`;
+    tr.innerHTML=`<td><input type="text" value="${esc(sheetDesc)}" placeholder="e.g. Clear 3/16&quot; — 46x22&quot;" oninput="sheetDesc=this.value;syncDesc()" style="width:100%"></td><td style="text-align:center;font-weight:600;color:#1A3A5C">${sheetQty}</td><td style="text-align:right;font-weight:600;color:#1A3A5C">${fmt(sp)}</td><td id="sheetAmt_${tbId}" style="text-align:right;font-weight:700;color:#1A3A5C">${fmt(sp*sheetQty)}</td>`;
     tb.appendChild(tr);
   }
   if(cuts>0){
@@ -345,7 +368,7 @@ function buildTable(tbId){
     const dId=tbId==='tb2'?`id="rD2_${i}"`:'';
     const qId=tbId==='tb2'?`id="rQ2_${i}"`:'';
     const pId=tbId==='tb2'?`id="rP2_${i}"`:'';
-    tr.innerHTML=`<td><input type="text" ${dId} value="${r.desc}" placeholder="Description" oninput="rows[${i}].desc=this.value;${s1}"></td><td><input type="number" ${qId} value="${r.qty||''}" min="1" placeholder="1" oninput="rows[${i}].qty=this.value;${s2}recalc()" style="text-align:center;width:40px"></td><td><input type="number" ${pId} value="${r.price||''}" step="0.01" min="0" placeholder="0.00" oninput="rows[${i}].price=this.value;${s3}recalc()" style="text-align:right;width:55px"></td><td id="a_${tbId}_${i}" style="text-align:right">—</td>`;
+    tr.innerHTML=`<td><input type="text" ${dId} value="${esc(r.desc)}" placeholder="Description" oninput="rows[${i}].desc=this.value;${s1}"></td><td><input type="number" ${qId} value="${esc(r.qty||'')}" min="1" placeholder="1" oninput="rows[${i}].qty=this.value;${s2}recalc()" style="text-align:center;width:40px"></td><td><input type="number" ${pId} value="${esc(r.price||'')}" step="0.01" min="0" placeholder="0.00" oninput="rows[${i}].price=this.value;${s3}recalc()" style="text-align:right;width:55px"></td><td id="a_${tbId}_${i}" style="text-align:right">—</td>`;
     tb.appendChild(tr);
   });
 }
@@ -371,11 +394,21 @@ function recalc(){
   const el2=document.getElementById('sheetAmt_tb2');if(el2)el2.textContent=fmt(sheetAmt);
   const sub=ms+sheetAmt+cuts*20;
   const tps=sub*.05,tvq=sub*.09975,total=sub+tps+tvq;
+  /* Deposit is applied AFTER tax so TPS/TVQ stay based on the full amount. */
+  const dep=parseFloat(document.getElementById('cDeposit').value)||0;
   [1,2].forEach(c=>{
     document.getElementById('sub'+c).textContent=fmt(sub);
     document.getElementById('tps'+c).textContent=fmt(tps);
     document.getElementById('tvq'+c).textContent=fmt(tvq);
     document.getElementById('tot'+c).textContent=fmt(total);
+    const dRow=document.getElementById('depRow'+c),bRow=document.getElementById('balRow'+c);
+    if(dep>0){
+      dRow.style.display='flex';bRow.style.display='flex';
+      document.getElementById('dep'+c).textContent='-'+fmt(dep);
+      document.getElementById('bal'+c).textContent=fmt(total-dep);
+    }else{
+      dRow.style.display='none';bRow.style.display='none';
+    }
   });
 }
 
@@ -401,6 +434,7 @@ function getCurrentData(){
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
   const sub=(sp*sheetQty)+cuts*20+rows.reduce((s,r)=>{const q=parseFloat(r.qty)||1,p=parseFloat(r.price)||0;return s+(r.price===''?0:q*p);},0);
   const total=sub*1.14975;
+  const deposit=parseFloat(document.getElementById('cDeposit').value)||0;
   return {
     num:document.getElementById('cNum').value,
     date:document.getElementById('cDate').value,
@@ -410,6 +444,8 @@ function getCurrentData(){
     notes:document.getElementById('cNotes').value,
     sheetPrice:sp,sheetDesc,sheetQty,cuts,rows:[...rows],
     sub:+sub.toFixed(2),total:+total.toFixed(2),
+    deposit:+deposit.toFixed(2),
+    balance:+(total-deposit).toFixed(2),
     savedAt:new Date().toISOString()
   };
 }
@@ -423,6 +459,7 @@ function loadData(d){
   document.getElementById('cNotes').value=d.notes||'';
   document.getElementById('cSheet').value=d.sheetPrice||'';
   document.getElementById('cCuts').value=d.cuts||0;
+  document.getElementById('cDeposit').value=d.deposit||'';
   sheetDesc=d.sheetDesc||'';
   sheetQty=d.sheetQty||1;
   document.getElementById('cSheetQty').value=sheetQty;
@@ -478,7 +515,8 @@ function renderArchive(){
   tb.innerHTML='';
   entries.forEach(d=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="font-weight:700;color:#FFC107">#${d.num}</td><td>${d.date}</td><td>${d.customer}</td><td class="pay-col">${d.payment||'—'}</td><td class="total-col">${fmt(d.total)}</td><td><div class="arch-actions"><button class="btn-sm btn-open" onclick="openArchiveInv('${d.num}')">📂 Open</button><button class="btn-sm btn-del" onclick="deleteArchiveInv('${d.num}')">🗑</button></div></td>`;
+    const depNote=d.deposit>0?`<div style="font-size:.68rem;color:#2e7d32">Deposit ${fmt(d.deposit)} · Due ${fmt(d.balance)}</div>`:'';
+    tr.innerHTML=`<td style="font-weight:700;color:#FFC107">#${esc(d.num)}</td><td>${esc(d.date)}</td><td>${esc(d.customer)}</td><td class="pay-col">${esc(d.payment||'—')}</td><td class="total-col">${fmt(d.total)}${depNote}</td><td><div class="arch-actions"><button class="btn-sm btn-open" onclick="openArchiveInv('${esc(d.num)}')">📂 Open</button><button class="btn-sm btn-del" onclick="deleteArchiveInv('${esc(d.num)}')">🗑</button></div></td>`;
     tb.appendChild(tr);
   });
 }
@@ -498,14 +536,15 @@ async function deleteArchiveInv(num){
 }
 
 function newInv(){
-  const n=getNum()+1;saveNum(n);
-  document.getElementById('cNum').value=n;
+  /* رقم الفاتورة يدوي: يبقى كما هو ولا يزيد تلقائياً */
+  saveNum(document.getElementById('cNum').value);
   document.getElementById('cCust').value='';
   document.getElementById('cPhone').value='';
   document.getElementById('cNotes').value='';
   document.getElementById('cSheet').value='';
   document.getElementById('cSheetQty').value=1;
   document.getElementById('cCuts').value=0;
+  document.getElementById('cDeposit').value='';
   document.getElementById('cPay').value='💵 Cash';
   rows=Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
   sheetDesc='';sheetQty=1;
@@ -521,7 +560,7 @@ function showTab(name){
   const idx=tabs.indexOf(name);
   if(idx>=0)document.querySelectorAll('.tab-bar button')[idx].classList.add('active');
   if(name==='archive')renderArchive();
-  if(name==='cutorder'){coSyncFromInvoice();renderCoArchive();}
+  if(name==='cutorder'){coSyncFromInvoice();loadCoArchive();}
 }
 
 // ============ CUT ORDER ============
@@ -577,7 +616,7 @@ function coRenderPieces(){
   tbody.innerHTML='';
   coPieces.forEach((p,i)=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="text-align:center;color:#FFC107;font-weight:700">${i+2}</td><td>${p.w||'—'}"</td><td>${p.h||'—'}"</td><td>${p.thick}</td><td>${p.notes||'—'}</td><td>${p.material}</td><td><button class="btn-sm btn-del" onclick="coRemovePiece(${i})">✕</button></td>`;
+    tr.innerHTML=`<td style="text-align:center;color:#FFC107;font-weight:700">${i+2}</td><td>${esc(p.w||'—')}"</td><td>${esc(p.h||'—')}"</td><td>${esc(p.thick)}</td><td>${esc(p.notes||'—')}</td><td>${esc(p.material)}</td><td><button class="btn-sm btn-del" onclick="coRemovePiece(${i})">✕</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -657,30 +696,58 @@ function getCutOrderData(){
   };
 }
 
+function setCoStatus(ok){
+  const dot=document.getElementById('coDot'),st=document.getElementById('coStatus');
+  if(!dot||!st)return;
+  dot.className='sync-dot'+(ok?'':' off');
+  st.textContent=ok?'Synced with Firebase':'Firebase offline — showing local copy';
+}
+
 async function saveCutOrder(){
   const d=getCutOrderData();
   if(!d.invNum){alert('Link to an Invoice # first (fill Invoice tab).');return;}
   const arch=JSON.parse(localStorage.getItem('gmc_co_archive')||'{}');
   arch[d.invNum]=d;
   localStorage.setItem('gmc_co_archive',JSON.stringify(arch));
+  let ok=false;
   try{
-    await fetch(FB+'/cut_orders/'+d.invNum+'.json',{method:'PUT',body:JSON.stringify(d),headers:{'Content-Type':'application/json'}});
-  }catch(e){}
+    const res=await fetch(FB+'/cut_orders/'+d.invNum+'.json',{method:'PUT',body:JSON.stringify(d),headers:{'Content-Type':'application/json'}});
+    ok=res.ok;
+    if(!ok){const err=await res.text();alert('⚠️ Firebase Error '+res.status+':\n'+err+'\n\nSaved locally only.');}
+  }catch(e){alert('⚠️ Network Error: '+e.message+'\n\nSaved locally only.');}
+  setCoStatus(ok);
   renderCoArchive();
-  alert('✅ Cut Order #'+d.invNum+' saved!');
+  if(ok)alert('✅ Cut Order #'+d.invNum+' saved!');
+}
+
+/* FIX: cut orders were only ever read from localStorage, so anything saved
+   on another browser/device (or after the cache was cleared) never showed up.
+   Now we pull from Firebase and merge, exactly like the invoice archive does. */
+async function loadCoArchive(){
+  try{
+    const r=await fetch(FB+'/cut_orders.json');
+    const fb=await r.json();
+    if(fb){
+      const local=JSON.parse(localStorage.getItem('gmc_co_archive')||'{}');
+      const merged={...local,...fb};
+      localStorage.setItem('gmc_co_archive',JSON.stringify(merged));
+    }
+    setCoStatus(true);
+  }catch(e){setCoStatus(false);}
+  renderCoArchive();
 }
 
 function renderCoArchive(){
   const arch=JSON.parse(localStorage.getItem('gmc_co_archive')||'{}');
   const tb=document.getElementById('coArchBody');
-  const entries=Object.values(arch).sort((a,b)=>b.invNum-a.invNum);
+  const entries=Object.values(arch).filter(d=>d&&d.invNum).sort((a,b)=>b.invNum-a.invNum);
   if(!entries.length){tb.innerHTML='<tr><td colspan="6"><div class="arch-empty">No cut orders yet.</div></td></tr>';return;}
   tb.innerHTML='';
   entries.forEach(d=>{
     const statusMap={pending:'co-arch-pending',cutting:'co-arch-cutting',ready:'co-arch-ready',picked:'co-arch-picked'};
     const statusLabel={pending:'Pending',cutting:'Cutting',ready:'Ready',picked:'Picked Up'};
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="font-weight:700;color:#FFC107">#${d.invNum}</td><td>${d.date||'—'}</td><td>${d.client||'—'}</td><td style="font-size:.78rem">${d.width||'?'}" × ${d.height||'?'}" × ${d.thickness||'?'}</td><td><span class="co-arch-badge ${statusMap[d.status]||''}">${statusLabel[d.status]||d.status}</span></td><td><div class="arch-actions"><button class="btn-sm btn-open" onclick="openCutOrder('${d.invNum}')">📂</button><button class="btn-sm btn-del" onclick="deleteCutOrder('${d.invNum}')">🗑</button></div></td>`;
+    tr.innerHTML=`<td style="font-weight:700;color:#FFC107">#${esc(d.invNum)}</td><td>${esc(d.date||'—')}</td><td>${esc(d.client||'—')}</td><td style="font-size:.78rem">${esc(d.width||'?')}" × ${esc(d.height||'?')}" × ${esc(d.thickness||'?')}</td><td><span class="co-arch-badge ${statusMap[d.status]||''}">${esc(statusLabel[d.status]||d.status||'—')}</span></td><td><div class="arch-actions"><button class="btn-sm btn-open" onclick="openCutOrder('${esc(d.invNum)}')">📂</button><button class="btn-sm btn-del" onclick="deleteCutOrder('${esc(d.invNum)}')">🗑</button></div></td>`;
     tb.appendChild(tr);
   });
 }
@@ -720,7 +787,7 @@ async function deleteCutOrder(num){
 function printCutOrder(){
   const d=getCutOrderData();
   const pw=window.open('','_blank');
-  pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cut Order #${d.invNum}</title>
+  pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cut Order #${esc(d.invNum)}</title>
   <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',Arial,sans-serif;padding:15mm 18mm;font-size:9pt}
   .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #1A3A5C;padding-bottom:5mm;margin-bottom:5mm}
   .badge{background:#1A1A1A;border:2.5px solid #FFC107;color:#FFC107;font-weight:900;font-size:10pt;width:48px;height:48px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
@@ -740,17 +807,17 @@ function printCutOrder(){
       <div class="badge">GMC</div>
       <div style="margin-left:10px"><div class="co">GMC Plexiglass</div><div style="font-size:7.5pt;color:#777">1433 Rue Bergar, Laval H7L 4Z7</div></div>
     </div>
-    <div style="text-align:right"><div style="font-size:7pt;color:#aaa;text-transform:uppercase">Cut Order</div><div class="num">#${d.invNum||'—'}</div><div style="font-size:8pt;color:#555">${d.date||''}</div></div>
+    <div style="text-align:right"><div style="font-size:7pt;color:#aaa;text-transform:uppercase">Cut Order</div><div class="num">#${esc(d.invNum||'—')}</div><div style="font-size:8pt;color:#555">${esc(d.date||'')}</div></div>
   </div>
-  <table><tr><th>Client</th><td>${d.client||'—'}</td><th>Tel</th><td>${d.tel||'—'}</td><th>Payment</th><td>${d.payment||'—'}</td></tr>
-  <tr><th>Material</th><td>${d.material||'—'}</td><th>Thickness</th><td>${d.thickness||'—'}</td><th>Price</th><td>$${d.price||'0'} + Taxes</td></tr>
-  <tr><th>Width</th><td>${d.width||'—'}"</td><th>Height</th><td>${d.height||'—'}"</td><th>Qty</th><td>${d.qty||1} piece(s)</td></tr>
-  <tr><th>Notes</th><td colspan="5">${d.notes||'—'}</td></tr></table>
-  ${d.extraPieces&&d.extraPieces.length?`<table style="margin-top:6px"><thead><tr><th>#</th><th>Width</th><th>Height</th><th>Thickness</th><th>Material</th><th>Notes</th></tr></thead><tbody>${d.extraPieces.map((p,i)=>`<tr><td style="text-align:center;font-weight:700;color:#FFC107">${i+2}</td><td>${p.w||'—'}"</td><td>${p.h||'—'}"</td><td>${p.thick||'—'}</td><td>${p.material||'—'}</td><td>${p.notes||'—'}</td></tr>`).join('')}</tbody></table>`:''}
+  <table><tr><th>Client</th><td>${esc(d.client||'—')}</td><th>Tel</th><td>${esc(d.tel||'—')}</td><th>Payment</th><td>${esc(d.payment||'—')}</td></tr>
+  <tr><th>Material</th><td>${esc(d.material||'—')}</td><th>Thickness</th><td>${esc(d.thickness||'—')}</td><th>Price</th><td>$${esc(d.price||'0')} + Taxes</td></tr>
+  <tr><th>Width</th><td>${esc(d.width||'—')}"</td><th>Height</th><td>${esc(d.height||'—')}"</td><th>Qty</th><td>${esc(d.qty||1)} piece(s)</td></tr>
+  <tr><th>Notes</th><td colspan="5">${esc(d.notes||'—')}</td></tr></table>
+  ${d.extraPieces&&d.extraPieces.length?`<table style="margin-top:6px"><thead><tr><th>#</th><th>Width</th><th>Height</th><th>Thickness</th><th>Material</th><th>Notes</th></tr></thead><tbody>${d.extraPieces.map((p,i)=>`<tr><td style="text-align:center;font-weight:700;color:#FFC107">${i+2}</td><td>${esc(p.w||'—')}"</td><td>${esc(p.h||'—')}"</td><td>${esc(p.thick||'—')}</td><td>${esc(p.material||'—')}</td><td>${esc(p.notes||'—')}</td></tr>`).join('')}</tbody></table>`:''}
   <div style="font-size:7pt;color:#888;margin:4px 0">Visual Preview (1 cell = 0.5")</div>
   <div class="grid" id="pg"></div>
   <div class="wf" style="margin-top:10px">
-    <div class="wf-row"><div><div class="wf-label">Payment</div><div>${d.payment||'—'}</div></div><div><div class="wf-label">Pickup Date</div><div>${d.wfPickDate||'___________'}</div></div></div>
+    <div class="wf-row"><div><div class="wf-label">Payment</div><div>${esc(d.payment||'—')}</div></div><div><div class="wf-label">Pickup Date</div><div>${esc(d.wfPickDate||'___________')}</div></div></div>
   </div>
   <script>
     const g=document.getElementById('pg');const COLS=27,ROWS=13;
@@ -765,17 +832,20 @@ function printCutOrder(){
 // ============ END CUT ORDER ============
 
 // Init — one-time reset to correct starting number
-if(!localStorage.getItem('gmc_inv_reset_v1')){saveNum(138657);localStorage.setItem('gmc_inv_reset_v1','1');}
+if(!localStorage.getItem('gmc_inv_reset_v2')){saveNum(138699);localStorage.setItem('gmc_inv_reset_v2','1');}
 document.getElementById('cNum').value=getNum();
 document.getElementById('cDate').value=today();
 ['cNum','cDate','cCust','cPhone','cNotes'].forEach(id=>document.getElementById(id).addEventListener('input',updateMeta));
+document.getElementById('cNum').addEventListener('input',function(){saveNum(this.value);});
 document.getElementById('cPay').addEventListener('change',updateMeta);
 document.getElementById('cSheet').addEventListener('input',rebuildAll);
 document.getElementById('cCuts').addEventListener('input',rebuildAll);
+document.getElementById('cDeposit').addEventListener('input',recalc);
 rebuildAll();updateMeta();
 loadArchive();
 coInitGrid();
 coSetStatus('pending');
+loadCoArchive();
 </script>
 </body>
 </html>

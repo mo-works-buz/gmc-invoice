@@ -137,6 +137,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 }
 .co-print-area{display:none}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 </head>
 <body>
 <div class="screen-controls">
@@ -169,6 +170,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
   <button class="active" onclick="showTab('invoice')">🧾 Invoice</button>
   <button onclick="showTab('archive')">📂 Archive</button>
   <button onclick="showTab('cutorder')">✂️ Cut Order</button>
+  <button onclick="showTab('report')">📊 Report</button>
 </div>
 
 <div class="tab-panel active" id="tab-invoice">
@@ -308,6 +310,19 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
     <div class="co-section-title" style="margin-top:20px">📋 Cut Order Archive</div>
     <div class="sync-bar"><div class="sync-dot off" id="coDot"></div><span id="coStatus">Connecting to Firebase...</span><button class="btn-sm btn-open" style="margin-left:auto" onclick="loadCoArchive()">🔄 Refresh</button></div>
     <table class="arch-tbl"><thead><tr><th>#</th><th>Date</th><th>Client</th><th>Dimensions</th><th>Status</th><th></th></tr></thead><tbody id="coArchBody"></tbody></table>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-report">
+  <div class="archive-wrap">
+    <h3>📊 Sales Report</h3>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+      <label style="font-size:.82rem">From <input type="date" id="rFrom" style="padding:6px;border:1px solid #ccc;border-radius:6px"></label>
+      <label style="font-size:.82rem">To <input type="date" id="rTo" style="padding:6px;border:1px solid #ccc;border-radius:6px"></label>
+      <button class="sc-btn save" onclick="genReportXLSX()">⬇ Download Excel</button>
+      <span id="rStatus" style="font-size:.8rem;color:#666"></span>
+    </div>
+    <div id="rPreview" style="overflow-x:auto"></div>
   </div>
 </div>
 
@@ -535,9 +550,20 @@ async function deleteArchiveInv(num){
   renderArchive();
 }
 
-function newInv(){
-  /* رقم الفاتورة يدوي: يبقى كما هو ولا يزيد تلقائياً */
-  saveNum(document.getElementById('cNum').value);
+async function newInv(){
+  /* رقم الفاتورة تلقائي: يفتح رقم جديد = أعلى رقم موجود + 1 */
+  let mx=parseInt(document.getElementById('cNum').value||'0',10)||0;
+  try{
+    const r=await fetch(FB+'/invoices.json?shallow=true');const fb=await r.json()||{};
+    Object.keys(fb).forEach(k=>{const n=parseInt(k,10);if(n>mx)mx=n;});
+  }catch(e){}
+  try{
+    const local=JSON.parse(localStorage.getItem('gmc_inv_archive')||'{}');
+    Object.values(local).forEach(d=>{const n=parseInt((d&&d.num)||'0',10);if(n>mx)mx=n;});
+  }catch(e){}
+  const next=String(mx+1);
+  document.getElementById('cNum').value=next;
+  saveNum(next);
   document.getElementById('cCust').value='';
   document.getElementById('cPhone').value='';
   document.getElementById('cNotes').value='';
@@ -556,12 +582,138 @@ function showTab(name){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
-  const tabs=['invoice','archive','cutorder'];
+  const tabs=['invoice','archive','cutorder','report'];
   const idx=tabs.indexOf(name);
   if(idx>=0)document.querySelectorAll('.tab-bar button')[idx].classList.add('active');
   if(name==='archive')renderArchive();
   if(name==='cutorder'){coSyncFromInvoice();loadCoArchive();}
 }
+
+// ============ SALES REPORT ============
+function rDefaultDates(){
+  const t=new Date();const f=new Date(t);f.setDate(t.getDate()-13);
+  const iso=d=>d.toISOString().slice(0,10);
+  const a=document.getElementById('rFrom'),b=document.getElementById('rTo');
+  if(a&&!a.value)a.value=iso(f); if(b&&!b.value)b.value=iso(t);
+}
+function r2(n){return Math.round((parseFloat(n)||0)*100)/100;}
+function rIsDeliveryRow(rw){return /deliver|livraison/i.test(String((rw&&rw.desc)||''));}
+function rRowData(d){
+  const cuts=parseInt(d.cuts||'0',10)||0;
+  const cutRate=cuts>0?20:0, cutFees=cuts*20;
+  let delivery=0;
+  (d.rows||[]).forEach(rw=>{
+    if(rIsDeliveryRow(rw)){const q=parseFloat(rw.qty);delivery+=(parseFloat(rw.price)||0)*((q>0)?q:1);}
+  });
+  delivery=r2(delivery);
+  const sub=r2(d.sub), total=r2(d.total);
+  const sheetSales=r2(sub-cutFees-delivery);
+  const tax=r2(total-sub);
+  return {num:String(d.num||''),date:d.date||'',customer:d.customer||'—',
+    payment:d.payment||'',sheetSales:sheetSales,cuts:cuts,cutRate:cutRate,cutFees:cutFees,
+    delivery:delivery,sub:sub,tax:tax,total:total,deposit:r2(d.deposit)};
+}
+async function rFetchRange(){
+  const from=document.getElementById('rFrom').value, to=document.getElementById('rTo').value;
+  const st=document.getElementById('rStatus'); st.textContent='Loading…';
+  const r=await fetch(FB+'/invoices.json'); const all=await r.json()||{};
+  const list=Object.values(all).filter(d=>d&&d.date&&d.date>=from&&d.date<=to)
+    .sort((a,b)=>(a.date<b.date?-1:a.date>b.date?1:String(a.num).localeCompare(String(b.num),undefined,{numeric:true})));
+  st.textContent=list.length+' invoices found';
+  return {from:from,to:to,list:list.map(rRowData)};
+}
+function rRenderPreview(rows){
+  const el=document.getElementById('rPreview');
+  const heads=['Invoice #','Date','Customer','Payment','Sheet Sales','Cuts','Cutting Fees','Delivery','Subtotal','Tax','Total'];
+  let h='<table class="arch-tbl"><thead><tr>'+heads.map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>';
+  const T={n:0,tot:0};
+  rows.forEach(r=>{
+    T.n++;T.tot+=r.total;
+    h+='<tr><td>'+r.num+'</td><td>'+r.date+'</td><td>'+r.customer+'</td><td>'+r.payment+'</td><td>$'+r.sheetSales.toFixed(2)+'</td><td>'+r.cuts+'</td><td>$'+r.cutFees.toFixed(2)+'</td><td>$'+r.delivery.toFixed(2)+'</td><td>$'+r.sub.toFixed(2)+'</td><td>$'+r.tax.toFixed(2)+'</td><td><b>$'+r.total.toFixed(2)+'</b></td></tr>';
+  });
+  h+='</tbody></table><p style="font-size:.85rem;margin-top:8px"><b>TOTAL: $'+T.tot.toFixed(2)+'</b> ('+T.n+' invoices)</p>';
+  el.innerHTML=h;
+}
+async function genReportXLSX(){
+  if(typeof ExcelJS==='undefined'){alert('Excel library failed to load — check internet and retry.');return;}
+  const st=document.getElementById('rStatus');
+  try{
+    const res=await rFetchRange();
+    const from=res.from,to=res.to,list=res.list;
+    rRenderPreview(list);
+    const wb=new ExcelJS.Workbook();
+    const ws=wb.addWorksheet('Sales Report');
+    ws.columns=[{width:12},{width:12},{width:20},{width:16},{width:12},{width:9},{width:9},{width:12},{width:11},{width:11},{width:10},{width:11}];
+    const moneyFmt='$#,##0.00';
+    ws.getCell('A1').value='GMC PLEXIGLASS — SALES REPORT';
+    ws.getCell('A1').font={bold:true,size:14};
+    ws.getCell('A2').value='Period: '+from+'  →  '+to;
+    const heads=['Invoice #','Date','Customer','Payment','Sheet Sales','Cuts (#)','Cut Rate','Cutting Fees','Delivery ($)','Subtotal ($)','Tax ($)','Total ($)'];
+    const hr=ws.getRow(4);
+    heads.forEach((hh,i)=>{hr.getCell(i+1).value=hh;});
+    hr.eachCell(c=>{c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1A3A5C'}};c.font={bold:true,color:{argb:'FFFFFFFF'}};});
+    list.forEach((r,i)=>{
+      const row=ws.getRow(5+i);
+      const vals=[r.num,r.date,r.customer,r.payment,r.sheetSales,r.cuts,r.cutRate,r.cutFees,r.delivery,r.sub,r.tax,r.total];
+      vals.forEach((v,j)=>{row.getCell(j+1).value=v;});
+      [5,8,9,10,11,12].forEach(c=>{row.getCell(c).numFmt=moneyFmt;});
+    });
+    const last=4+list.length;
+    const tr=ws.getRow(last+1);
+    tr.getCell(1).value='TOTAL'; tr.getCell(1).font={bold:true};
+    const colL={5:'E',6:'F',7:'G',8:'H',9:'I',10:'J',11:'K',12:'L'};
+    Object.keys(colL).forEach(k=>{
+      const c=+k,L=colL[k];
+      tr.getCell(c).value={formula:'SUM('+L+'5:'+L+last+')'};
+      tr.getCell(c).font={bold:true};
+      if([5,8,9,10,11,12].indexOf(c)>=0)tr.getCell(c).numFmt=moneyFmt;
+    });
+    let nr=last+3;
+    const deps=list.filter(r=>r.deposit>0);
+    if(deps.length){
+      ws.getCell('A'+nr).value='NOTE: Deposits received — '+deps.map(r=>'#'+r.num+' ('+r.customer+') $'+r.deposit.toFixed(2)).join('  |  ');
+      nr++;
+    }
+    nr++;
+    ws.getCell('A'+nr).value='BREAKDOWN BY PAYMENT METHOD'; ws.getCell('A'+nr).font={bold:true}; nr++;
+    const bh=['Payment Method','# Invoices','Cuts (#)','Cutting Fees','Delivery ($)','Subtotal ($)','Tax ($)','Total ($)'];
+    const bhr=ws.getRow(nr);
+    bh.forEach((hh,i)=>{bhr.getCell(i+1).value=hh;});
+    bhr.eachCell(c=>{c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1A3A5C'}};c.font={bold:true,color:{argb:'FFFFFFFF'}};});
+    nr++;
+    const bStart=nr;
+    const groups={};
+    list.forEach(r=>{(groups[r.payment]=groups[r.payment]||[]).push(r);});
+    Object.keys(groups).forEach(p=>{
+      const g=groups[p], row=ws.getRow(nr);
+      const s=k=>r2(g.reduce((a,r)=>a+r[k],0));
+      row.getCell(1).value=p; row.getCell(2).value=g.length;
+      row.getCell(3).value=s('cuts'); row.getCell(4).value=s('cutFees');
+      row.getCell(5).value=s('delivery'); row.getCell(6).value=s('sub');
+      row.getCell(7).value=s('tax'); row.getCell(8).value=s('total');
+      [4,5,6,7,8].forEach(c=>{row.getCell(c).numFmt=moneyFmt;});
+      nr++;
+    });
+    const bEnd=nr-1;
+    const btr=ws.getRow(nr);
+    btr.getCell(1).value='TOTAL'; btr.getCell(1).font={bold:true};
+    const bcL={2:'B',3:'C',4:'D',5:'E',6:'F',7:'G',8:'H'};
+    Object.keys(bcL).forEach(k=>{
+      const c=+k,L=bcL[k];
+      btr.getCell(c).value={formula:'SUM('+L+bStart+':'+L+bEnd+')'};
+      btr.getCell(c).font={bold:true};
+      if([4,5,6,7,8].indexOf(c)>=0)btr.getCell(c).numFmt=moneyFmt;
+    });
+    const buf=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='GMC_Sales_Report_'+from+'_to_'+to+'.xlsx';
+    a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    st.textContent='Downloaded ✓';
+  }catch(e){ st.textContent='Error: '+e.message; }
+}
+// ============ END SALES REPORT ============
 
 // ============ CUT ORDER ============
 function coCalcTotal(){
@@ -842,6 +994,7 @@ document.getElementById('cSheet').addEventListener('input',rebuildAll);
 document.getElementById('cCuts').addEventListener('input',rebuildAll);
 document.getElementById('cDeposit').addEventListener('input',recalc);
 rebuildAll();updateMeta();
+rDefaultDates();
 loadArchive();
 coInitGrid();
 coSetStatus('pending');

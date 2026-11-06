@@ -126,8 +126,21 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 .co-arch-cutting{background:#e3f2fd;color:#1565c0}
 .co-arch-ready{background:#e8f5e9;color:#2e7d32}
 .co-arch-picked{background:#f3e5f5;color:#6a1b9a}
+.sig-block{display:none}
+.sig-block .sig-title{background:#1A3A5C;color:#fff;font-size:7pt;font-weight:700;letter-spacing:.5px;padding:3px 7px;margin-bottom:2mm}
+.sig-block .sig-txt{font-size:6.6pt;line-height:1.45;color:#333;margin-bottom:3mm}
+.sig-block .sig-txt b{color:#000}
+.sig-block .sig-lines{display:flex;gap:6mm}
+.sig-block .sig-f{flex:1}
+.sig-block .sig-f .sl{font-size:6.2pt;color:#666;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6mm}
+.sig-block .sig-f .ln{border-bottom:1px solid #1A3A5C;height:0}
+.sig-block .sig-f.narrow{flex:0 0 80pt}
+.split-box{display:none;gap:6px;align-items:flex-end}
+.split-box.on{display:flex}
 @media print{
   body{background:#fff;padding:0}
+  .sig-block{display:block!important}
+  .items-tbl tbody tr.empty-row{display:none!important}
   .screen-controls,.tab-bar,.archive-wrap,.co-wrap{display:none!important}
   .page-wrap{gap:0}
   .inv{box-shadow:none;page-break-after:always;margin:0;width:100%}
@@ -154,7 +167,20 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
       <option value="📱 E-Transfer">📱 E-Transfer</option>
       <option value="🖊 Cheque">🖊 Cheque</option>
       <option value="🌐 Online Order">🌐 Online Order</option>
+      <option value="🔀 Split Payment">🔀 Split Payment</option>
     </select>
+  </div>
+  <div class="split-box" id="splitBox">
+    <div class="sc-group" style="width:95px"><label title="Amount paid in cash">Cash Part ($)</label><input id="cSplitCash" type="number" min="0" step="0.01" placeholder="0.00" oninput="updateMeta()" style="border-color:#4CAF50"></div>
+    <div class="sc-group" style="width:135px">
+      <label>Rest Paid By</label>
+      <select id="cSplit2" onchange="updateMeta()">
+        <option value="💳 Credit Card">💳 Credit Card</option>
+        <option value="🏧 Debit Card">🏧 Debit Card</option>
+        <option value="📱 E-Transfer">📱 E-Transfer</option>
+        <option value="🖊 Cheque">🖊 Cheque</option>
+      </select>
+    </div>
   </div>
   <div class="sc-group" style="width:100px"><label>Sheet Price ($)</label><input id="cSheet" type="number" min="0" step="0.01" value="" placeholder="0.00" oninput="rebuildAll()"></div>
   <div class="sc-group" style="width:70px"><label>Sheet Qty</label><input id="cSheetQty" type="number" min="1" value="1" placeholder="1" oninput="sheetQty=parseInt(this.value)||1;rebuildAll()"></div>
@@ -163,6 +189,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
   <div class="sc-group" style="width:180px"><label>Notes</label><input id="cNotes" type="text" placeholder="Optional"></div>
   <button class="sc-btn save" onclick="saveInvoice()">💾 Save</button>
   <button class="sc-btn print" onclick="window.print()">🖨 Print</button>
+  <button class="sc-btn new" onclick="addLine()">➕ Add Line</button>
   <button class="sc-btn new" onclick="newInv()">➕ New</button>
 </div>
 
@@ -210,6 +237,20 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
         <div class="t-row dep" id="depRow1" style="display:none"><span>Deposit Paid / Acompte versé</span><span id="dep1">-$0.00</span></div>
         <div class="t-row balance" id="balRow1" style="display:none"><span>BALANCE DUE / SOLDE</span><span id="bal1">$0.00</span></div>
       </div></div>
+      <div class="sig-block">
+        <div class="sig-title">RÉCEPTION DE LA MARCHANDISE / RECEIPT OF GOODS</div>
+        <div class="sig-txt">
+          J'ai inspecté et reçu la marchandise décrite ci-dessus <b>en bon état</b>, sans égratignure, fissure ni dommage apparent.
+          Aucun retour, échange ou réclamation ne sera accepté après la signature.<br>
+          I have inspected and received the goods described above <b>in good condition</b>, free of scratches, cracks or visible damage.
+          No return, exchange or claim will be accepted after signature.
+        </div>
+        <div class="sig-lines">
+          <div class="sig-f"><div class="sl">Nom / Name</div><div class="ln"></div></div>
+          <div class="sig-f"><div class="sl">Signature</div><div class="ln"></div></div>
+          <div class="sig-f narrow"><div class="sl">Date</div><div class="ln"></div></div>
+        </div>
+      </div>
       <div class="inv-footer">Thank you for your business! — GMC Plexiglass &nbsp;|&nbsp; Merci pour votre confiance!</div>
     </div>
     <div class="inv" id="c2">
@@ -247,6 +288,20 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
         <div class="t-row dep" id="depRow2" style="display:none"><span>Deposit Paid / Acompte versé</span><span id="dep2">-$0.00</span></div>
         <div class="t-row balance" id="balRow2" style="display:none"><span>BALANCE DUE / SOLDE</span><span id="bal2">$0.00</span></div>
       </div></div>
+      <div class="sig-block">
+        <div class="sig-title">RÉCEPTION DE LA MARCHANDISE / RECEIPT OF GOODS</div>
+        <div class="sig-txt">
+          J'ai inspecté et reçu la marchandise décrite ci-dessus <b>en bon état</b>, sans égratignure, fissure ni dommage apparent.
+          Aucun retour, échange ou réclamation ne sera accepté après la signature.<br>
+          I have inspected and received the goods described above <b>in good condition</b>, free of scratches, cracks or visible damage.
+          No return, exchange or claim will be accepted after signature.
+        </div>
+        <div class="sig-lines">
+          <div class="sig-f"><div class="sl">Nom / Name</div><div class="ln"></div></div>
+          <div class="sig-f"><div class="sl">Signature</div><div class="ln"></div></div>
+          <div class="sig-f narrow"><div class="sl">Date</div><div class="ln"></div></div>
+        </div>
+      </div>
       <div class="inv-footer">Thank you for your business! — GMC Plexiglass &nbsp;|&nbsp; Merci pour votre confiance!</div>
     </div>
   </div>
@@ -383,7 +438,8 @@ function buildTable(tbId){
     const dId=tbId==='tb2'?`id="rD2_${i}"`:'';
     const qId=tbId==='tb2'?`id="rQ2_${i}"`:'';
     const pId=tbId==='tb2'?`id="rP2_${i}"`:'';
-    tr.innerHTML=`<td><input type="text" ${dId} value="${esc(r.desc)}" placeholder="Description" oninput="rows[${i}].desc=this.value;${s1}"></td><td><input type="number" ${qId} value="${esc(r.qty||'')}" min="1" placeholder="1" oninput="rows[${i}].qty=this.value;${s2}recalc()" style="text-align:center;width:40px"></td><td><input type="number" ${pId} value="${esc(r.price||'')}" step="0.01" min="0" placeholder="0.00" oninput="rows[${i}].price=this.value;${s3}recalc()" style="text-align:right;width:55px"></td><td id="a_${tbId}_${i}" style="text-align:right">—</td>`;
+    if(!String(r.desc||'').trim() && String(r.price||'')==='') tr.className='empty-row';
+    tr.innerHTML=`<td><input type="text" ${dId} value="${esc(r.desc)}" placeholder="Description" oninput="rows[${i}].desc=this.value;${s1}" onchange="ensureRows()"></td><td><input type="number" ${qId} value="${esc(r.qty||'')}" min="1" placeholder="1" oninput="rows[${i}].qty=this.value;${s2}recalc()" style="text-align:center;width:40px"></td><td><input type="number" ${pId} value="${esc(r.price||'')}" step="0.01" min="0" placeholder="0.00" oninput="rows[${i}].price=this.value;${s3}recalc()" style="text-align:right;width:55px"></td><td id="a_${tbId}_${i}" style="text-align:right">—</td>`;
     tb.appendChild(tr);
   });
 }
@@ -393,6 +449,19 @@ function syncDesc(){
 }
 
 function rebuildAll(){buildTable('tb1');buildTable('tb2');recalc();}
+
+/* Unlimited description lines: always keep one spare blank row at the end,
+   and never drop a row the user has already typed into. */
+function ensureRows(){
+  let lastUsed=-1;
+  rows.forEach((r,i)=>{if(String(r.desc||'').trim()||String(r.price||'')!=='')lastUsed=i;});
+  const want=Math.max(NROWS,lastUsed+2);
+  let changed=false;
+  while(rows.length<want){rows.push({desc:'',qty:'',price:''});changed=true;}
+  while(rows.length>want&&rows.length>NROWS){rows.pop();changed=true;}
+  if(changed)rebuildAll();
+}
+function addLine(){rows.push({desc:'',qty:'',price:''});rebuildAll();}
 
 function recalc(){
   let ms=0;
@@ -425,6 +494,7 @@ function recalc(){
       dRow.style.display='none';bRow.style.display='none';
     }
   });
+  if(document.getElementById('cPay').value==='🔀 Split Payment')updateMeta();
 }
 
 function updateMeta(){
@@ -432,7 +502,16 @@ function updateMeta(){
   const date=document.getElementById('cDate').value;
   const cust=document.getElementById('cCust').value||'—';
   const phone=document.getElementById('cPhone').value;
-  const pay=document.getElementById('cPay').value;
+  let pay=document.getElementById('cPay').value;
+  const isSplit=pay==='🔀 Split Payment';
+  document.getElementById('splitBox').classList.toggle('on',isSplit);
+  if(isSplit){
+    const tot=parseFloat(String(document.getElementById('tot1').textContent).replace(/[^0-9.]/g,''))||0;
+    const cashPart=parseFloat(document.getElementById('cSplitCash').value)||0;
+    const m2=document.getElementById('cSplit2').value;
+    const rest=Math.max(0,+(tot-cashPart).toFixed(2));
+    pay='💵 Cash $'+cashPart.toFixed(2)+'  +  '+m2+' $'+rest.toFixed(2);
+  }
   const notes=document.getElementById('cNotes').value||'—';
   [1,2].forEach(c=>{
     document.getElementById('dNum'+c).textContent=num;
@@ -455,7 +534,16 @@ function getCurrentData(){
     date:document.getElementById('cDate').value,
     customer:document.getElementById('cCust').value||'—',
     phone:document.getElementById('cPhone').value,
-    payment:document.getElementById('cPay').value,
+    payment:(function(){
+      const base=document.getElementById('cPay').value;
+      if(base!=='🔀 Split Payment')return base;
+      const t=sub*1.14975, cashPart=parseFloat(document.getElementById('cSplitCash').value)||0;
+      const m2=document.getElementById('cSplit2').value;
+      return '💵 Cash $'+cashPart.toFixed(2)+' + '+m2+' $'+Math.max(0,+(t-cashPart).toFixed(2)).toFixed(2);
+    })(),
+    payMethod:document.getElementById('cPay').value,
+    splitCash:parseFloat(document.getElementById('cSplitCash').value)||0,
+    splitMethod2:document.getElementById('cSplit2').value,
     notes:document.getElementById('cNotes').value,
     sheetPrice:sp,sheetDesc,sheetQty,cuts,rows:[...rows],
     sub:+sub.toFixed(2),total:+total.toFixed(2),
@@ -470,7 +558,9 @@ function loadData(d){
   document.getElementById('cDate').value=d.date;
   document.getElementById('cCust').value=d.customer==='—'?'':d.customer;
   document.getElementById('cPhone').value=d.phone||'';
-  document.getElementById('cPay').value=d.payment||'💵 Cash';
+  document.getElementById('cPay').value=d.payMethod||(/^🔀|Cash \$/.test(String(d.payment||''))?'🔀 Split Payment':(d.payment||'💵 Cash'));
+  document.getElementById('cSplitCash').value=d.splitCash||'';
+  document.getElementById('cSplit2').value=d.splitMethod2||'💳 Credit Card';
   document.getElementById('cNotes').value=d.notes||'';
   document.getElementById('cSheet').value=d.sheetPrice||'';
   document.getElementById('cCuts').value=d.cuts||0;
@@ -479,7 +569,8 @@ function loadData(d){
   sheetQty=d.sheetQty||1;
   document.getElementById('cSheetQty').value=sheetQty;
   rows=d.rows?d.rows.map(r=>({...r})):Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
-  rebuildAll();updateMeta();
+  while(rows.length<NROWS)rows.push({desc:'',qty:'',price:''});
+  ensureRows();rebuildAll();updateMeta();
 }
 
 // SAVE
@@ -572,6 +663,9 @@ async function newInv(){
   document.getElementById('cCuts').value=0;
   document.getElementById('cDeposit').value='';
   document.getElementById('cPay').value='💵 Cash';
+  document.getElementById('cSplitCash').value='';
+  document.getElementById('cSplit2').value='💳 Credit Card';
+  document.getElementById('splitBox').classList.remove('on');
   rows=Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
   sheetDesc='';sheetQty=1;
   rebuildAll();updateMeta();

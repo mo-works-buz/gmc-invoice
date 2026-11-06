@@ -86,6 +86,9 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 .t-row.balance{border-top:2px solid #FFC107;border-bottom:none;margin-top:3px;padding-top:5px;font-size:10.5pt;font-weight:800;color:#1A3A5C}
 .t-row.balance span:last-child{color:#c62828}
 .t-row.subtle{font-size:7.5pt;color:#999}
+.t-row.terms{font-size:7pt;color:#8c9aab;border-bottom:none;padding-top:4px}
+.t-row.terms span:last-child{font-weight:600;color:#6d7a89}
+.prep-f{flex:0 0 120pt}
 .inv-footer{text-align:center;font-size:6.8pt;color:#bbb;border-top:1px solid #eee;padding-top:3mm}
 /* Bilingual: French is the main line, English a smaller light-grey line under it. */
 .en{display:block;font-size:5.6pt;color:#b9c0ca;font-weight:400;text-transform:none;letter-spacing:0;line-height:1.1;margin-top:1px}
@@ -215,7 +218,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
           <div class="inv-badge"><img src="gmc-logo.jpg" alt="GMC" style="width:100%;height:auto;" onerror="this.onerror=null;this.src='https://mo-works-buz.github.io/gmc-invoice/gmc-logo.jpg'"></div>
           <div class="inv-co">
             <div class="co-name">GMC Plexiglass</div>
-            <div class="co-city">Montreal, QC, Canada</div>
+            <div class="co-city">1433 Rue Bergar, Laval, QC  H7L 4Z7 &nbsp;•&nbsp; Tél: +1 514-991-7890 &nbsp;•&nbsp; info.gmcplexiglass@gmail.com</div>
             <div class="co-tax">TPS/GST: 732249932RT0001 &nbsp;|&nbsp; TVQ/QST: 1227484345TQ0001</div>
           </div>
         </div>
@@ -238,9 +241,10 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
         <div class="t-row"><span>Sous-total<span class="en">Subtotal</span></span><span id="sub1">$0.00</span></div>
         <div class="t-row"><span>TPS (5%)<span class="en">GST</span></span><span id="tps1">$0.00</span></div>
         <div class="t-row"><span>TVQ (9,975%)<span class="en">QST</span></span><span id="tvq1">$0.00</span></div>
-        <div class="t-row grand"><span>TOTAL<span class="en">Total</span></span><span id="tot1">$0.00</span></div>
+        <div class="t-row grand"><span>TOTAL <span style="font-size:7pt;color:#8c9aab;font-weight:600">CAD</span><span class="en">Total</span></span><span id="tot1">$0.00</span></div>
         <div class="t-row dep" id="depRow1" style="display:none"><span>Acompte versé<span class="en">Deposit Paid</span></span><span id="dep1">-$0.00</span></div>
         <div class="t-row balance" id="balRow1" style="display:none"><span>SOLDE À PAYER<span class="en">Balance Due</span></span><span id="bal1">$0.00</span></div>
+        <div class="t-row terms" id="termsRow1"><span>Conditions de paiement<span class="en">Terms of payment</span></span><span>Payable sur réception<span class="en" style="display:block;text-align:right">Due on receipt</span></span></div>
       </div></div>
       <div class="sig-block">
         <div class="sig-title">RÉCEPTION DE LA MARCHANDISE / RECEIPT OF GOODS</div>
@@ -266,7 +270,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
           <div class="inv-badge"><img src="gmc-logo.jpg" alt="GMC" style="width:100%;height:auto;" onerror="this.onerror=null;this.src='https://mo-works-buz.github.io/gmc-invoice/gmc-logo.jpg'"></div>
           <div class="inv-co">
             <div class="co-name">GMC Plexiglass</div>
-            <div class="co-city">Montreal, QC, Canada</div>
+            <div class="co-city">1433 Rue Bergar, Laval, QC  H7L 4Z7 &nbsp;•&nbsp; Tél: +1 514-991-7890 &nbsp;•&nbsp; info.gmcplexiglass@gmail.com</div>
             <div class="co-tax">TPS/GST: 732249932RT0001 &nbsp;|&nbsp; TVQ/QST: 1227484345TQ0001</div>
           </div>
         </div>
@@ -289,9 +293,10 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
         <div class="t-row"><span>Sous-total<span class="en">Subtotal</span></span><span id="sub2">$0.00</span></div>
         <div class="t-row"><span>TPS (5%)<span class="en">GST</span></span><span id="tps2">$0.00</span></div>
         <div class="t-row"><span>TVQ (9,975%)<span class="en">QST</span></span><span id="tvq2">$0.00</span></div>
-        <div class="t-row grand"><span>TOTAL<span class="en">Total</span></span><span id="tot2">$0.00</span></div>
+        <div class="t-row grand"><span>TOTAL <span style="font-size:7pt;color:#8c9aab;font-weight:600">CAD</span><span class="en">Total</span></span><span id="tot2">$0.00</span></div>
         <div class="t-row dep" id="depRow2" style="display:none"><span>Acompte versé<span class="en">Deposit Paid</span></span><span id="dep2">-$0.00</span></div>
         <div class="t-row balance" id="balRow2" style="display:none"><span>SOLDE À PAYER<span class="en">Balance Due</span></span><span id="bal2">$0.00</span></div>
+        <div class="t-row terms" id="termsRow2"><span>Conditions de paiement<span class="en">Terms of payment</span></span><span>Payable sur réception<span class="en" style="display:block;text-align:right">Due on receipt</span></span></div>
       </div></div>
       <div class="sig-block">
         <div class="sig-title">RÉCEPTION DE LA MARCHANDISE / RECEIPT OF GOODS</div>
@@ -304,7 +309,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
         <div class="sig-lines">
           <div class="sig-f"><div class="sl">Nom / Name</div><div class="ln"></div></div>
           <div class="sig-f"><div class="sl">Signature</div><div class="ln"></div></div>
-          <div class="sig-f narrow"><div class="sl">Date</div><div class="ln"></div></div>
+          <div class="sig-f narrow"><div class="sl">Date</div><div class="ln"></div></div><div class="sig-f prep-f"><div class="sl">Préparé / Remis par &nbsp;<span style="color:#b9c0ca;text-transform:none">(interne)</span></div><div class="ln"></div></div>
         </div>
       </div>
       <div class="inv-footer">Merci pour votre confiance! — GMC Plexiglass &nbsp;|&nbsp; Thank you for your business!</div>

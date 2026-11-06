@@ -1099,6 +1099,19 @@ document.getElementById('cDeposit').addEventListener('input',recalc);
 rebuildAll();updateMeta();
 rDefaultDates();
 loadArchive();
+
+/* On open: start on a BLANK invoice with the next free number.
+   Runs only while the form is still untouched, so it can never
+   overwrite something being typed. */
+(async function startFresh(){
+  try{
+    if(document.getElementById('cCust').value.trim())return;
+    await newInv();
+    if(document.getElementById('cCust').value.trim())return;
+    document.getElementById('cDate').value=today();
+    updateMeta();
+  }catch(e){}
+})();
 coInitGrid();
 coSetStatus('pending');
 loadCoArchive();

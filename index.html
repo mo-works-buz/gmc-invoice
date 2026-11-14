@@ -190,13 +190,13 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
       </select>
     </div>
   </div>
-  <div class="sc-group" style="width:100px"><label>Sheet Price ($)</label><input id="cSheet" type="number" min="0" step="0.01" value="" placeholder="0.00" oninput="rebuildAll()"></div>
-  <div class="sc-group" style="width:70px"><label>Sheet Qty</label><input id="cSheetQty" type="number" min="1" value="1" placeholder="1" oninput="sheetQty=parseInt(this.value)||1;rebuildAll()"></div>
-  <div class="sc-group" style="width:80px"><label>Cuts ($20 ea)</label><input id="cCuts" type="number" min="0" value="0" placeholder="0"></div>
+  <div class="sc-group" style="width:70px"><label>Cuts (qty)</label><input id="cCuts" type="number" min="0" value="0" placeholder="0"></div>
+  <div class="sc-group" style="width:90px"><label title="Price per cut — change it for special cuts or a discount">Cut Price ($)</label><input id="cCutPrice" type="number" min="0" step="0.01" value="20" placeholder="20.00" oninput="rebuildAll()" style="border-color:#FFC107"></div>
   <div class="sc-group" style="width:100px"><label title="Deducted AFTER tax — does not reduce TPS/TVQ">Deposit ($)</label><input id="cDeposit" type="number" min="0" step="0.01" value="" placeholder="0.00" oninput="recalc()" style="border-color:#4CAF50"></div>
   <div class="sc-group" style="width:180px"><label>Notes</label><input id="cNotes" type="text" placeholder="Optional"></div>
   <button class="sc-btn save" onclick="saveInvoice()">💾 Save</button>
   <button class="sc-btn print" onclick="window.print()">🖨 Print</button>
+  <button class="sc-btn new" style="background:#1565c0" onclick="addSheet()">➕ Add Sheet</button>
   <button class="sc-btn new" onclick="addLine()">➕ Add Line</button>
   <button class="sc-btn new" onclick="newInv()">➕ New</button>
 </div>
@@ -405,8 +405,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 const NROWS=5;
 const FB='https://gmc-plexiglass-default-rtdb.firebaseio.com';
 let rows=Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
-let sheetDesc='';
-let sheetQty=1;
+let sheets=[{desc:'',qty:1,price:''}];
 
 /* FIX: escape values before injecting into HTML attributes.
    Without this, any description containing a double quote (e.g. 44" x 80")
@@ -424,19 +423,30 @@ function getNum(){return localStorage.getItem('gmc_inv_n')||'138699';}
 function saveNum(n){if(n!==''&&n!=null)localStorage.setItem('gmc_inv_n',String(n));}
 function today(){return new Date().toISOString().slice(0,10);}
 function fmt(n){return '$'+parseFloat(n||0).toFixed(2);}
+function cutRate(){const el=document.getElementById('cCutPrice');const v=el?parseFloat(el.value):20;return isNaN(v)?20:v;}
 
 function buildTable(tbId){
   const tb=document.getElementById(tbId);tb.innerHTML='';
-  const sp=parseFloat(document.getElementById('cSheet').value)||0;
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
-  if(sp>0){
+  sheets.forEach((sh,i)=>{
     const tr=document.createElement('tr');tr.style.background='#fffdf5';
-    tr.innerHTML=`<td><input type="text" value="${esc(sheetDesc)}" placeholder="e.g. Clear 3/16&quot; — 46x22&quot;" oninput="sheetDesc=this.value;syncDesc()" style="width:100%"></td><td style="text-align:center;font-weight:600;color:#1A3A5C">${sheetQty}</td><td style="text-align:right;font-weight:600;color:#1A3A5C">${fmt(sp)}</td><td id="sheetAmt_${tbId}" style="text-align:right;font-weight:700;color:#1A3A5C">${fmt(sp*sheetQty)}</td>`;
+    const q=Math.max(1,parseFloat(sh.qty)||1), pr=parseFloat(sh.price)||0;
+    if(!String(sh.desc||'').trim() && String(sh.price||'')==='') tr.className='empty-row';
+    const k1=tbId==='tb1'?`const e=document.getElementById('sD2_${i}');if(e)e.value=this.value;`:'';
+    const k2=tbId==='tb1'?`const e=document.getElementById('sQ2_${i}');if(e)e.value=this.value;`:'';
+    const k3=tbId==='tb1'?`const e=document.getElementById('sP2_${i}');if(e)e.value=this.value;`:'';
+    const i1=tbId==='tb2'?`id="sD2_${i}"`:'';
+    const i2=tbId==='tb2'?`id="sQ2_${i}"`:'';
+    const i3=tbId==='tb2'?`id="sP2_${i}"`:'';
+    tr.innerHTML=`<td><input type="text" ${i1} value="${esc(sh.desc)}" placeholder="e.g. Clear 5.5mm &mdash; 48&quot; x 96&quot;" oninput="sheets[${i}].desc=this.value;${k1}" style="width:100%;font-weight:600;color:#1A3A5C"></td>`
+      +`<td><input type="number" ${i2} value="${esc(sh.qty||'')}" min="1" placeholder="1" oninput="sheets[${i}].qty=this.value;${k2}recalc()" style="text-align:center;width:40px;font-weight:600;color:#1A3A5C"></td>`
+      +`<td><input type="number" ${i3} value="${esc(sh.price||'')}" step="0.01" min="0" placeholder="0.00" oninput="sheets[${i}].price=this.value;${k3}recalc()" style="text-align:right;width:62px;font-weight:600;color:#1A3A5C"></td>`
+      +`<td id="sA_${tbId}_${i}" style="text-align:right;font-weight:700;color:#1A3A5C">${pr>0?fmt(pr*q):'\u2014'}</td>`;
     tb.appendChild(tr);
-  }
+  });
   if(cuts>0){
     const tr=document.createElement('tr');tr.style.background='#fffdf5';
-    tr.innerHTML=`<td style="color:#555;font-style:italic">Frais de coupe<span class="en">Cutting fee</span></td><td style="text-align:center;color:#555">${cuts}</td><td style="text-align:right;color:#555">$20.00</td><td style="text-align:right;font-weight:700;color:#FFC107">${fmt(cuts*20)}</td>`;
+    tr.innerHTML=`<td style="color:#555;font-style:italic">Frais de coupe<span class="en">Cutting fee</span></td><td style="text-align:center;color:#555">${cuts}</td><td style="text-align:right;color:#555">${fmt(cutRate())}</td><td style="text-align:right;font-weight:700;color:#FFC107">${fmt(cuts*cutRate())}</td>`;
     tb.appendChild(tr);
   }
   rows.forEach((r,i)=>{
@@ -453,9 +463,7 @@ function buildTable(tbId){
   });
 }
 
-function syncDesc(){
-  ['tb1','tb2'].forEach(id=>{const tb=document.getElementById(id);if(tb&&tb.rows[0]){const inp=tb.rows[0].querySelector('input[type=text]');if(inp&&inp.value!==sheetDesc)inp.value=sheetDesc;}});
-}
+function addSheet(){sheets.push({desc:'',qty:1,price:''});rebuildAll();}
 
 function rebuildAll(){buildTable('tb1');buildTable('tb2');recalc();}
 
@@ -480,12 +488,14 @@ function recalc(){
     const v=amt>0?fmt(amt):'—';
     ['tb1','tb2'].forEach(id=>{const el=document.getElementById('a_'+id+'_'+i);if(el)el.textContent=v;});
   });
-  const sp=parseFloat(document.getElementById('cSheet').value)||0;
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
-  const sheetAmt=sp*sheetQty;
-  const el1=document.getElementById('sheetAmt_tb1');if(el1)el1.textContent=fmt(sheetAmt);
-  const el2=document.getElementById('sheetAmt_tb2');if(el2)el2.textContent=fmt(sheetAmt);
-  const sub=ms+sheetAmt+cuts*20;
+  let sheetAmt=0;
+  sheets.forEach((sh,i)=>{
+    const q=Math.max(1,parseFloat(sh.qty)||1), pr=parseFloat(sh.price)||0;
+    const amt=pr*q; sheetAmt+=amt;
+    ['tb1','tb2'].forEach(id=>{const el=document.getElementById('sA_'+id+'_'+i);if(el)el.textContent=amt>0?fmt(amt):'\u2014';});
+  });
+  const sub=ms+sheetAmt+cuts*cutRate();
   const tps=sub*.05,tvq=sub*.09975,total=sub+tps+tvq;
   /* Deposit is applied AFTER tax so TPS/TVQ stay based on the full amount. */
   const dep=parseFloat(document.getElementById('cDeposit').value)||0;
@@ -533,9 +543,10 @@ function updateMeta(){
 }
 
 function getCurrentData(){
-  const sp=parseFloat(document.getElementById('cSheet').value)||0;
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
-  const sub=(sp*sheetQty)+cuts*20+rows.reduce((s,r)=>{const q=parseFloat(r.qty)||1,p=parseFloat(r.price)||0;return s+(r.price===''?0:q*p);},0);
+  const sheetAmt=sheets.reduce((a,sh)=>a+(parseFloat(sh.price)||0)*Math.max(1,parseFloat(sh.qty)||1),0);
+  const sp=parseFloat(sheets[0]&&sheets[0].price)||0;
+  const sub=sheetAmt+cuts*cutRate()+rows.reduce((s,r)=>{const q=parseFloat(r.qty)||1,p=parseFloat(r.price)||0;return s+(r.price===''?0:q*p);},0);
   const total=sub*1.14975;
   const deposit=parseFloat(document.getElementById('cDeposit').value)||0;
   return {
@@ -554,7 +565,9 @@ function getCurrentData(){
     splitCash:parseFloat(document.getElementById('cSplitCash').value)||0,
     splitMethod2:document.getElementById('cSplit2').value,
     notes:document.getElementById('cNotes').value,
-    sheetPrice:sp,sheetDesc,sheetQty,cuts,rows:[...rows],
+    sheets:sheets.map(x=>({...x})),
+    sheetPrice:sp,sheetDesc:(sheets[0]&&sheets[0].desc)||'',sheetQty:Math.max(1,parseFloat(sheets[0]&&sheets[0].qty)||1),
+    cuts,cutPrice:cutRate(),rows:[...rows],
     sub:+sub.toFixed(2),total:+total.toFixed(2),
     deposit:+deposit.toFixed(2),
     balance:+(total-deposit).toFixed(2),
@@ -571,12 +584,13 @@ function loadData(d){
   document.getElementById('cSplitCash').value=d.splitCash||'';
   document.getElementById('cSplit2').value=d.splitMethod2||'💳 Credit Card';
   document.getElementById('cNotes').value=d.notes||'';
-  document.getElementById('cSheet').value=d.sheetPrice||'';
+
   document.getElementById('cCuts').value=d.cuts||0;
+  document.getElementById('cCutPrice').value=(d.cutPrice!=null&&d.cutPrice!=='')?d.cutPrice:20;
   document.getElementById('cDeposit').value=d.deposit||'';
-  sheetDesc=d.sheetDesc||'';
-  sheetQty=d.sheetQty||1;
-  document.getElementById('cSheetQty').value=sheetQty;
+  sheets=(d.sheets&&d.sheets.length)?d.sheets.map(x=>({...x}))
+        :[{desc:d.sheetDesc||'',qty:d.sheetQty||1,price:(d.sheetPrice?d.sheetPrice:'')}];
+  if(!sheets.length)sheets=[{desc:'',qty:1,price:''}];
   rows=d.rows?d.rows.map(r=>({...r})):Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
   while(rows.length<NROWS)rows.push({desc:'',qty:'',price:''});
   ensureRows();rebuildAll();updateMeta();
@@ -667,16 +681,16 @@ async function newInv(){
   document.getElementById('cCust').value='';
   document.getElementById('cPhone').value='';
   document.getElementById('cNotes').value='';
-  document.getElementById('cSheet').value='';
-  document.getElementById('cSheetQty').value=1;
+
   document.getElementById('cCuts').value=0;
+  document.getElementById('cCutPrice').value=20;
   document.getElementById('cDeposit').value='';
   document.getElementById('cPay').value='💵 Cash';
   document.getElementById('cSplitCash').value='';
   document.getElementById('cSplit2').value='💳 Credit Card';
   document.getElementById('splitBox').classList.remove('on');
   rows=Array.from({length:NROWS},()=>({desc:'',qty:'',price:''}));
-  sheetDesc='';sheetQty=1;
+  sheets=[{desc:'',qty:1,price:''}];
   rebuildAll();updateMeta();
   showTab('invoice');
 }
@@ -703,7 +717,8 @@ function r2(n){return Math.round((parseFloat(n)||0)*100)/100;}
 function rIsDeliveryRow(rw){return /deliver|livraison/i.test(String((rw&&rw.desc)||''));}
 function rRowData(d){
   const cuts=parseInt(d.cuts||'0',10)||0;
-  const cutRate=cuts>0?20:0, cutFees=cuts*20;
+  const rate=(d.cutPrice!=null&&d.cutPrice!=='')?parseFloat(d.cutPrice):20;
+  const cutRate=cuts>0?rate:0, cutFees=cuts*rate;
   let delivery=0;
   (d.rows||[]).forEach(rw=>{
     if(rIsDeliveryRow(rw)){const q=parseFloat(rw.qty);delivery+=(parseFloat(rw.price)||0)*((q>0)?q:1);}
@@ -1093,8 +1108,8 @@ document.getElementById('cDate').value=today();
 ['cNum','cDate','cCust','cPhone','cNotes'].forEach(id=>document.getElementById(id).addEventListener('input',updateMeta));
 document.getElementById('cNum').addEventListener('input',function(){saveNum(this.value);});
 document.getElementById('cPay').addEventListener('change',updateMeta);
-document.getElementById('cSheet').addEventListener('input',rebuildAll);
 document.getElementById('cCuts').addEventListener('input',rebuildAll);
+document.getElementById('cCutPrice').addEventListener('input',rebuildAll);
 document.getElementById('cDeposit').addEventListener('input',recalc);
 rebuildAll();updateMeta();
 rDefaultDates();

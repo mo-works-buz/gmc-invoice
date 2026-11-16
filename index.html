@@ -987,9 +987,17 @@ function printWaybill(){
     +wbCopy(w,'COPIE CLIENT / CUSTOMER COPY')+wbCopy(w,'COPIE CHAUFFEUR — SIGNÉE / DRIVER COPY — SIGNED')
     +'</body></html>');
   pw.document.close();
-  const imgs=pw.document.querySelectorAll('img[data-ax-logo]');
-  imgs.forEach(function(i){i.src=AX_LOGO;});
-  setTimeout(function(){pw.focus();pw.print();},600);
+  /* fill every brand image in the print window, then print only once they are decoded */
+  const set=function(sel,src){pw.document.querySelectorAll(sel).forEach(function(i){i.src=src;});};
+  set('img[data-gl-logo]',GL_LOGO);
+  set('img[data-ax-logo]',AX_LOGO);
+  set('img[data-ax-word]',AX_WORD);
+  const all=Array.prototype.slice.call(pw.document.images);
+  Promise.all(all.map(function(i){
+    return (i.decode?i.decode():Promise.resolve()).catch(function(){});
+  })).then(function(){
+    setTimeout(function(){pw.focus();pw.print();},250);
+  });
 }
 // ============ END WAYBILL ============
 

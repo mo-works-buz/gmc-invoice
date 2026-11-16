@@ -325,6 +325,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
   <div class="sc-group" style="width:70px"><label>Cuts (qty)</label><input id="cCuts" type="number" min="0" value="0" placeholder="0"></div>
   <div class="sc-group" style="width:90px"><label title="Price per cut — change it for special cuts or a discount">Cut Price ($)</label><input id="cCutPrice" type="number" min="0" step="0.01" value="20" placeholder="20.00" oninput="rebuildAll()" style="border-color:#13C6E8"></div>
   <div class="sc-group" style="width:100px"><label title="Deducted AFTER tax — does not reduce TPS/TVQ">Deposit ($)</label><input id="cDeposit" type="number" min="0" step="0.01" value="" placeholder="0.00" oninput="recalc()" style="border-color:#4CAF50"></div>
+  <div class="sc-group" style="width:230px"><label title="Shipping address — printed on the waybill">Delivery Address</label><input id="cShipAddr" type="text" placeholder="No., street, city, QC, postal code" style="border-color:#13C6E8"></div>
   <div class="sc-group" style="width:180px"><label>Notes</label><input id="cNotes" type="text" placeholder="Optional"></div>
   <button class="sc-btn save" onclick="saveInvoice()">💾 Save</button>
   <button class="sc-btn print" onclick="window.print()">🖨 Print</button>
@@ -458,6 +459,12 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 <div class="tab-panel" id="tab-waybill">
   <div class="co-wrap">
     <div class="co-section-title">🚚 Bon de livraison / Waybill — <span id="wbNum" style="color:var(--ax-cyan)"></span></div>
+    <div class="co-grid-row" style="max-width:420px">
+      <div class="co-field"><label>Colis / Parcels</label>
+        <input type="number" id="wbParcels" min="1" step="1" placeholder="auto" oninput="wbRender()" style="border-color:#13C6E8"></div>
+      <div class="co-field"><label>&nbsp;</label>
+        <button class="co-btn" style="background:#5A6A80;color:#fff" onclick="document.getElementById('wbParcels').value='';wbRender()">↺ Auto</button></div>
+    </div>
     <div class="co-btn-row" style="margin-bottom:14px">
       <button class="co-btn co-btn-save" onclick="wbRender()">↻ Refresh from invoice</button>
       <button class="co-btn co-btn-print" onclick="printWaybill()">🖨 Print Waybill (2 copies)</button>
@@ -721,6 +728,8 @@ function getCurrentData(){
       return '💵 Cash $'+cashPart.toFixed(2)+' + '+m2+' $'+Math.max(0,+(t-cashPart).toFixed(2)).toFixed(2);
     })(),
     payMethod:document.getElementById('cPay').value,
+    shipAddr:document.getElementById('cShipAddr').value,
+    parcels:(function(){const e=document.getElementById('wbParcels');const v=e?parseInt(e.value,10):NaN;return isNaN(v)?'':v;})(),
     splitCash:parseFloat(document.getElementById('cSplitCash').value)||0,
     splitMethod2:document.getElementById('cSplit2').value,
     notes:document.getElementById('cNotes').value,
@@ -742,6 +751,8 @@ function loadData(d){
   document.getElementById('cPay').value=d.payMethod||(/^🔀|Cash \$/.test(String(d.payment||''))?'🔀 Split Payment':(d.payment||'💵 Cash'));
   document.getElementById('cSplitCash').value=d.splitCash||'';
   document.getElementById('cSplit2').value=d.splitMethod2||'💳 Credit Card';
+  document.getElementById('cShipAddr').value=d.shipAddr||'';
+  {const e=document.getElementById('wbParcels');if(e)e.value=(d.parcels||d.parcels===0)?d.parcels:'';}
   document.getElementById('cNotes').value=d.notes||'';
 
   document.getElementById('cCuts').value=d.cuts||0;
@@ -839,6 +850,8 @@ async function newInv(){
   saveNum(next);
   document.getElementById('cCust').value='';
   document.getElementById('cPhone').value='';
+  document.getElementById('cShipAddr').value='';
+  {const e=document.getElementById('wbParcels');if(e)e.value='';}
   document.getElementById('cNotes').value='';
 
   document.getElementById('cCuts').value=0;
@@ -889,7 +902,8 @@ function wbEsc(x){return esc(x);}
 function wbData(){
   const d=getCurrentData();
   const notes=String(d.notes||'').trim();
-  const addr=notes.replace(/^\s*(delivery|livraison|pick\s*up|cueillette)\s*[-:–]?\s*/i,'').trim();
+  const typed=String(d.shipAddr||'').trim();
+  const addr=typed || notes.replace(/^\s*(delivery|livraison|pick\s*up|cueillette)\s*[-:–]?\s*/i,'').trim();
   const isPickup=/pick\s*up|cueillette/i.test(notes);
   let parcels=0;
   (d.sheets||[]).forEach(sh=>{ if(String(sh.price||'')!==''||String(sh.desc||'').trim()) parcels+=Math.max(1,parseInt(sh.qty)||1); });
@@ -897,6 +911,9 @@ function wbData(){
     if(/deliver|livraison|cut|coupe|laser|leaser|frais/i.test(t))return;
     parcels+=Math.max(1,parseInt(r.qty)||1); });
   if(parcels<1)parcels=1;
+  const po=document.getElementById('wbParcels');
+  const manual=po?parseInt(po.value,10):NaN;
+  if(!isNaN(manual)&&manual>0)parcels=manual;
   const items=[];
   (d.sheets||[]).forEach(sh=>{ if(String(sh.desc||'').trim()||String(sh.price||'')!=='')
       items.push([sh.desc||'Acrylic sheet',Math.max(1,parseInt(sh.qty)||1)]); });

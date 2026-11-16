@@ -229,6 +229,44 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 .arch-tbl .total-col,.co-arch-badge{color:var(--ax-navy)}
 .inv-num-block .num{color:var(--ax-navy)}
 .t-row.grand span:last-child,.t-row.balance span:last-child{color:var(--ax-navy)}
+.wb{background:#fff;width:210mm;margin:0 auto 10mm;padding:9mm 10mm;font-family:Helvetica,Arial,sans-serif;
+  font-size:8.5pt;color:#0A1A33;box-shadow:0 3px 14px rgba(0,0,0,.18);position:relative}
+.wb-top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0A1A33;padding-bottom:3mm;margin-bottom:3mm}
+.wb-top .wb-brand{display:flex;align-items:center;gap:4mm}
+.wb-top img.wbl{width:0.95in;height:auto;display:block}
+.wb-co{font-size:11.5pt;font-weight:700;line-height:1.2}
+.wb-co small{display:block;font-size:7.5pt;font-weight:400;color:#5A6A80;margin-top:1mm;line-height:1.35}
+.wb-id{text-align:right}
+.wb-id .wb-t{font-size:12pt;font-weight:700;letter-spacing:.5px}
+.wb-id .wb-t span{display:block;font-size:7pt;font-weight:400;color:#5A6A80;letter-spacing:1.5px}
+.wb-id .wb-n{font-size:17pt;font-weight:700;margin-top:1mm}
+.wb-copy{position:absolute;top:6mm;left:50%;transform:translateX(-50%);background:#0A1A33;color:#fff;
+  font-size:6.5pt;font-weight:700;letter-spacing:1.4px;padding:2px 10px;border-radius:3px}
+.wb-bc{margin-top:2mm}
+.wb-grid{display:grid;grid-template-columns:1fr 1fr;gap:3mm;margin-bottom:3mm}
+.wb-box{border:1px solid #C8D2DE;border-radius:4px;padding:2.5mm 3mm}
+.wb-box .bl{font-size:6.3pt;font-weight:700;letter-spacing:.8px;color:#fff;background:#0A1A33;
+  display:inline-block;padding:1px 6px;border-radius:2px;margin-bottom:2mm}
+.wb-box .bv{font-size:9.5pt;font-weight:700;line-height:1.35}
+.wb-box .bs{font-size:8.5pt;font-weight:400;line-height:1.45;color:#0A1A33}
+.wb-f{display:flex;gap:3mm;margin-bottom:3mm}
+.wb-cell{flex:1;border:1px solid #C8D2DE;border-radius:4px;padding:2mm 3mm;text-align:center}
+.wb-cell .cl{font-size:6.2pt;font-weight:700;color:#5A6A80;letter-spacing:.6px;text-transform:uppercase}
+.wb-cell .cv{font-size:12pt;font-weight:700;margin-top:1mm}
+.wb-cell.hi{background:#13C6E8;border-color:#13C6E8}
+.wb-cell.hi .cl{color:#06323c}
+.wb-items{width:100%;border-collapse:collapse;margin-bottom:3mm;font-size:8pt}
+.wb-items th{background:#0A1A33;color:#fff;font-weight:700;font-size:7pt;padding:3px 6px;text-align:left}
+.wb-items th:nth-child(2),.wb-items td:nth-child(2){text-align:center;width:50pt}
+.wb-items td{border-bottom:1px solid #E3E8EF;padding:3px 6px}
+.wb-sign{display:flex;gap:5mm;margin-top:4mm;padding-top:3mm;border-top:1px dashed #C8D2DE}
+.wb-sign .sf{flex:1}
+.wb-sign .sf .sl{font-size:6.2pt;color:#5A6A80;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7mm}
+.wb-sign .sf .ln{border-bottom:1px solid #0A1A33}
+.wb-sign .sf.n{flex:0 0 26mm}
+.wb-note{font-size:6.6pt;color:#5A6A80;line-height:1.45;margin-top:2.5mm}
+.wb-foot{text-align:center;margin-top:3mm;padding-top:2mm;border-top:1px solid #E3E8EF;
+  color:#13C6E8;font-size:6.6pt;font-weight:600;letter-spacing:2.2px}
 /* ---- revision 3 : sticker-style header ---- */
 .inv{font-family:Helvetica,Arial,sans-serif}
 .inv-header{display:flex;justify-content:space-between;align-items:flex-start;
@@ -297,6 +335,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
   <button class="active" onclick="showTab('invoice')">🧾 Invoice</button>
   <button onclick="showTab('archive')">📂 Archive</button>
   <button onclick="showTab('cutorder')">✂️ Cut Order</button>
+  <button onclick="showTab('waybill')">🚚 Waybill</button>
   <button onclick="showTab('report')">📊 Report</button>
 </div>
 
@@ -411,6 +450,17 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
       </div>
       <div class="inv-footer">Merci pour votre confiance! — Entreprise GMC Plexiglas inc. &nbsp;|&nbsp; Thank you for your business!<div class="ax-foot">ACRYLUX™ · PREMIUM ACRYLIC SHEETS</div></div>
     </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-waybill">
+  <div class="co-wrap">
+    <div class="co-section-title">🚚 Bon de livraison / Waybill — <span id="wbNum" style="color:var(--ax-cyan)"></span></div>
+    <div class="co-btn-row" style="margin-bottom:14px">
+      <button class="co-btn co-btn-save" onclick="wbRender()">↻ Refresh from invoice</button>
+      <button class="co-btn co-btn-print" onclick="printWaybill()">🖨 Print Waybill (2 copies)</button>
+    </div>
+    <div id="wbPreview"></div>
   </div>
 </div>
 
@@ -804,12 +854,122 @@ function showTab(name){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
-  const tabs=['invoice','archive','cutorder','report'];
+  const tabs=['invoice','archive','cutorder','waybill','report'];
   const idx=tabs.indexOf(name);
   if(idx>=0)document.querySelectorAll('.tab-bar button')[idx].classList.add('active');
   if(name==='archive')renderArchive();
   if(name==='cutorder'){coSyncFromInvoice();loadCoArchive();}
+  if(name==='waybill')wbRender();
 }
+
+// ============ WAYBILL ============
+/* Code128-B encoder -> inline SVG (self-contained, nothing loaded from the web) */
+const C128=['212222','222122','222221','121223','121322','131222','122213','122312','132212','221213','221312','231212','112232','122132','122231','113222','123122','123221','223211','221132','221231','213212','223112','312131','311222','321122','321221','312212','322112','322211','212123','212321','232121','111323','131123','131321','112313','132113','132311','211313','231113','231311','112133','112331','132131','113123','113321','133121','313121','211331','231131','213113','213311','213131','311123','311321','331121','312113','312311','332111','314111','221411','431111','111224','111422','121124','121421','141122','141221','112214','112412','122114','122411','142112','142211','241211','221114','413111','241112','134111','111242','121142','121241','114212','124112','124211','411212','421112','421211','212141','214121','412121','111143','111341','131141','114113','114311','411113','411311','113141','114131','311141','411131','211412','211214','211232','2331112'];
+function bc128(txt,w,h){
+  txt=String(txt||'');
+  const vals=[104];
+  for(let i=0;i<txt.length;i++)vals.push(txt.charCodeAt(i)-32);
+  let sum=104; for(let i=1;i<vals.length;i++)sum+=vals[i]*i;
+  vals.push(sum%103); vals.push(106);
+  let pat=''; vals.forEach(v=>pat+=C128[v]);
+  let total=0; for(const d of pat)total+=parseInt(d,10);
+  const unit=w/total; let x=0,bars='',dark=true;
+  for(const d of pat){
+    const len=parseInt(d,10)*unit;
+    if(dark)bars+='<rect x="'+x.toFixed(3)+'" y="0" width="'+len.toFixed(3)+'" height="'+h+'" fill="#0A1A33"/>';
+    x+=len; dark=!dark;
+  }
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+bars+'</svg>';
+}
+function wbEsc(x){return esc(x);}
+function wbData(){
+  const d=getCurrentData();
+  const notes=String(d.notes||'').trim();
+  const addr=notes.replace(/^\s*(delivery|livraison|pick\s*up|cueillette)\s*[-:–]?\s*/i,'').trim();
+  const isPickup=/pick\s*up|cueillette/i.test(notes);
+  let parcels=0;
+  (d.sheets||[]).forEach(sh=>{ if(String(sh.price||'')!==''||String(sh.desc||'').trim()) parcels+=Math.max(1,parseInt(sh.qty)||1); });
+  (d.rows||[]).forEach(r=>{ const t=String(r.desc||''); if(!t.trim())return;
+    if(/deliver|livraison|cut|coupe|laser|leaser|frais/i.test(t))return;
+    parcels+=Math.max(1,parseInt(r.qty)||1); });
+  if(parcels<1)parcels=1;
+  const items=[];
+  (d.sheets||[]).forEach(sh=>{ if(String(sh.desc||'').trim()||String(sh.price||'')!=='')
+      items.push([sh.desc||'Acrylic sheet',Math.max(1,parseInt(sh.qty)||1)]); });
+  (d.rows||[]).forEach(r=>{ const t=String(r.desc||'').trim(); if(!t)return;
+    if(/deliver|livraison|cut|coupe|laser|leaser|frais/i.test(t))return;
+    items.push([t,Math.max(1,parseInt(r.qty)||1)]); });
+  if(d.cuts>0)items.push(['Cutting service / service de coupe',d.cuts]);
+  return {num:d.num,date:d.date,cust:d.customer,phone:d.phone,addr:addr||'—',
+          mode:isPickup?'CUEILLETTE / PICK UP':'LIVRAISON / DELIVERY',
+          pay:d.payment,total:d.total,cod:/cash|comptant/i.test(String(d.payment||''))?d.total:0,
+          parcels:parcels,items:items,notes:notes||'—'};
+}
+function wbCopy(w,tag){
+  const money=n=>'$'+parseFloat(n||0).toFixed(2);
+  const rows=w.items.length?w.items.map(it=>'<tr><td>'+wbEsc(it[0])+'</td><td>'+it[1]+'</td></tr>').join('')
+            :'<tr><td>—</td><td>1</td></tr>';
+  return '<div class="wb">'
+  +'<div class="wb-copy">'+tag+'</div>'
+  +'<div class="wb-top"><div class="wb-brand">'
+  +'<img class="wbl" data-ax-logo src="" alt="ACRYLUX">'
+  +'<div class="wb-co">Entreprise GMC Plexiglas inc.'
+  +'<small>1433 Rue Bergar, Laval, QC&nbsp; H7L 4Z7<br>Tél: +1 514-991-7890 &nbsp;•&nbsp; Badria@gmcplexiglass.com</small></div></div>'
+  +'<div class="wb-id"><div class="wb-t">BON DE LIVRAISON<span>WAYBILL</span></div>'
+  +'<div class="wb-n">#'+wbEsc(w.num)+'</div>'
+  +'<div class="wb-bc">'+bc128(w.num,150,34)+'</div></div></div>'
+  +'<div class="wb-grid">'
+  +'<div class="wb-box"><div class="bl">1 &nbsp;EXPÉDITEUR / SHIPPER</div>'
+  +'<div class="bv">Entreprise GMC Plexiglas inc.</div>'
+  +'<div class="bs">1433 Rue Bergar, Laval, QC&nbsp; H7L 4Z7<br>Tél: +1 514-991-7890</div></div>'
+  +'<div class="wb-box"><div class="bl">2 &nbsp;DESTINATAIRE / CONSIGNEE</div>'
+  +'<div class="bv">'+wbEsc(w.cust)+'</div>'
+  +'<div class="bs">'+wbEsc(w.addr)+(w.phone?'<br>Tél: '+wbEsc(w.phone):'')+'</div></div>'
+  +'</div>'
+  +'<div class="wb-f">'
+  +'<div class="wb-cell"><div class="cl">Date</div><div class="cv">'+wbEsc(w.date)+'</div></div>'
+  +'<div class="wb-cell hi"><div class="cl">Colis / Parcels</div><div class="cv">'+w.parcels+'</div></div>'
+  +'<div class="wb-cell"><div class="cl">Mode</div><div class="cv" style="font-size:8pt">'+wbEsc(w.mode)+'</div></div>'
+  +'<div class="wb-cell"><div class="cl">Paiement / Payment</div><div class="cv" style="font-size:8.5pt">'+wbEsc(w.pay)+'</div></div>'
+  +'<div class="wb-cell"><div class="cl">Argent reçu / Cash</div><div class="cv">'+(w.cod?money(w.cod):'—')+'</div></div>'
+  +'</div>'
+  +'<table class="wb-items"><thead><tr><th>Description</th><th>Qté / Qty</th></tr></thead><tbody>'+rows+'</tbody></table>'
+  +'<div class="wb-box" style="margin-bottom:3mm"><div class="bl">INSTRUCTIONS SPÉCIALES / SPECIAL INSTRUCTIONS</div>'
+  +'<div class="bs">'+wbEsc(w.notes)+'</div></div>'
+  +'<div class="wb-sign">'
+  +'<div class="sf"><div class="sl">Nom du destinataire / Consignee name</div><div class="ln"></div></div>'
+  +'<div class="sf"><div class="sl">Signature</div><div class="ln"></div></div>'
+  +'<div class="sf n"><div class="sl">Date</div><div class="ln"></div></div>'
+  +'<div class="sf n"><div class="sl">Heure / Time</div><div class="ln"></div></div>'
+  +'</div>'
+  +'<div class="wb-note">La marchandise a été reçue en bon état, sans égratignure ni dommage apparent. Aucune réclamation après signature.<br>'
+  +'Goods received in good condition, free of scratches or visible damage. No claim will be accepted after signature.</div>'
+  +'<div class="wb-foot">ACRYLUX™ · PREMIUM ACRYLIC SHEETS</div>'
+  +'</div>';
+}
+function wbRender(){
+  const w=wbData();
+  document.getElementById('wbNum').textContent='#'+w.num;
+  document.getElementById('wbPreview').innerHTML=wbCopy(w,'COPIE CHAUFFEUR / DRIVER COPY')+wbCopy(w,'COPIE MAGASIN / SHOP COPY');
+  axApplyLogo();
+}
+function printWaybill(){
+  const w=wbData();
+  const css=Array.from(document.querySelectorAll('style')).map(s=>s.textContent).join('\n');
+  const pw=window.open('','_blank');
+  pw.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Waybill #'+w.num+'</title>'
+    +'<style>'+css+'\nbody{background:#fff;margin:0;padding:0}'
+    +'.wb{box-shadow:none;margin:0 auto;page-break-after:always;width:100%}'
+    +'.wb:last-child{page-break-after:avoid}'
+    +'@page{size:210mm 297mm;margin:8mm}</style></head><body>'
+    +wbCopy(w,'COPIE CHAUFFEUR / DRIVER COPY')+wbCopy(w,'COPIE MAGASIN / SHOP COPY')
+    +'</body></html>');
+  pw.document.close();
+  const imgs=pw.document.querySelectorAll('img[data-ax-logo]');
+  imgs.forEach(function(i){i.src=AX_LOGO;});
+  setTimeout(function(){pw.focus();pw.print();},600);
+}
+// ============ END WAYBILL ============
 
 // ============ SALES REPORT ============
 function rDefaultDates(){

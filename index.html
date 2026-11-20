@@ -92,6 +92,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 .t-row.balance{border-top:2px solid #13C6E8;border-bottom:none;margin-top:3px;padding-top:5px;font-size:10.5pt;font-weight:800;color:#1A3A5C}
 .t-row.balance span:last-child{color:#c62828}
 .t-row.subtle{font-size:7.5pt;color:#999}
+.t-row.disc{color:#C62828;font-weight:700}
+.t-row.disc span:last-child{color:#C62828}
 .t-row.terms{font-size:7pt;color:#8c9aab;border-bottom:none;padding-top:4px}
 .t-row.terms span:last-child{font-weight:600;color:#6d7a89}
 .prep-f{flex:0 0 120pt}
@@ -324,6 +326,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
   </div>
   <div class="sc-group" style="width:70px"><label>Cuts (qty)</label><input id="cCuts" type="number" min="0" value="0" placeholder="0"></div>
   <div class="sc-group" style="width:90px"><label title="Price per cut — change it for special cuts or a discount">Cut Price ($)</label><input id="cCutPrice" type="number" min="0" step="0.01" value="20" placeholder="20.00" oninput="rebuildAll()" style="border-color:#13C6E8"></div>
+  <div class="sc-group" style="width:95px"><label title="Discount applied BEFORE tax — reduces the taxable amount">Discount (%)</label><input id="cDisc" type="number" min="0" max="100" step="0.01" value="" placeholder="0" oninput="recalc()" style="border-color:#13C6E8"></div>
   <div class="sc-group" style="width:100px"><label title="Deducted AFTER tax — does not reduce TPS/TVQ">Deposit ($)</label><input id="cDeposit" type="number" min="0" step="0.01" value="" placeholder="0.00" oninput="recalc()" style="border-color:#4CAF50"></div>
   <div class="sc-group" style="width:230px"><label title="Shipping address — printed on the waybill">Delivery Address</label><input id="cShipAddr" type="text" placeholder="No., street, city, QC, postal code" style="border-color:#13C6E8"></div>
   <div class="sc-group" style="width:180px"><label>Notes</label><input id="cNotes" type="text" placeholder="Optional"></div>
@@ -375,6 +378,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
         <tbody id="tb1"></tbody>
       </table>
       <div class="totals-wrap"><div class="totals-box">
+        <div class="t-row" id="grsRow1" style="display:none"><span>Sous-total brut<span class="en">Gross subtotal</span></span><span id="grs1">$0.00</span></div>
+        <div class="t-row disc" id="dscRow1" style="display:none"><span id="dscL1">Remise<span class="en">Discount</span></span><span id="dsc1">-$0.00</span></div>
         <div class="t-row"><span>Sous-total<span class="en">Subtotal</span></span><span id="sub1">$0.00</span></div>
         <div class="t-row"><span>TPS (5%)<span class="en">GST</span></span><span id="tps1">$0.00</span></div>
         <div class="t-row"><span>TVQ (9,975%)<span class="en">QST</span></span><span id="tvq1">$0.00</span></div>
@@ -429,6 +434,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
         <tbody id="tb2"></tbody>
       </table>
       <div class="totals-wrap"><div class="totals-box">
+        <div class="t-row" id="grsRow2" style="display:none"><span>Sous-total brut<span class="en">Gross subtotal</span></span><span id="grs2">$0.00</span></div>
+        <div class="t-row disc" id="dscRow2" style="display:none"><span id="dscL2">Remise<span class="en">Discount</span></span><span id="dsc2">-$0.00</span></div>
         <div class="t-row"><span>Sous-total<span class="en">Subtotal</span></span><span id="sub2">$0.00</span></div>
         <div class="t-row"><span>TPS (5%)<span class="en">GST</span></span><span id="tps2">$0.00</span></div>
         <div class="t-row"><span>TVQ (9,975%)<span class="en">QST</span></span><span id="tvq2">$0.00</span></div>
@@ -661,11 +668,22 @@ function recalc(){
     const amt=pr*q; sheetAmt+=amt;
     ['tb1','tb2'].forEach(id=>{const el=document.getElementById('sA_'+id+'_'+i);if(el)el.textContent=amt>0?fmt(amt):'\u2014';});
   });
-  const sub=ms+sheetAmt+cuts*cutRate();
+  const gross=ms+sheetAmt+cuts*cutRate();
+  /* Discount is applied BEFORE tax: it lowers the taxable amount. */
+  const dpct=parseFloat(document.getElementById('cDisc').value)||0;
+  const disc=Math.round(gross*dpct)/100;
+  const sub=Math.round((gross-disc)*100)/100;
   const tps=sub*.05,tvq=sub*.09975,total=sub+tps+tvq;
   /* Deposit is applied AFTER tax so TPS/TVQ stay based on the full amount. */
   const dep=parseFloat(document.getElementById('cDeposit').value)||0;
   [1,2].forEach(c=>{
+    const gR=document.getElementById('grsRow'+c),dR=document.getElementById('dscRow'+c);
+    if(dpct>0){
+      gR.style.display='flex';dR.style.display='flex';
+      document.getElementById('grs'+c).textContent=fmt(gross);
+      document.getElementById('dscL'+c).innerHTML='Remise '+dpct+'%<span class="en">Discount '+dpct+'%</span>';
+      document.getElementById('dsc'+c).textContent='-'+fmt(disc);
+    }else{gR.style.display='none';dR.style.display='none';}
     document.getElementById('sub'+c).textContent=fmt(sub);
     document.getElementById('tps'+c).textContent=fmt(tps);
     document.getElementById('tvq'+c).textContent=fmt(tvq);
@@ -712,7 +730,10 @@ function getCurrentData(){
   const cuts=parseInt(document.getElementById('cCuts').value)||0;
   const sheetAmt=sheets.reduce((a,sh)=>a+(parseFloat(sh.price)||0)*Math.max(1,parseFloat(sh.qty)||1),0);
   const sp=parseFloat(sheets[0]&&sheets[0].price)||0;
-  const sub=sheetAmt+cuts*cutRate()+rows.reduce((s,r)=>{const q=parseFloat(r.qty)||1,p=parseFloat(r.price)||0;return s+(r.price===''?0:q*p);},0);
+  const gross=sheetAmt+cuts*cutRate()+rows.reduce((s,r)=>{const q=parseFloat(r.qty)||1,p=parseFloat(r.price)||0;return s+(r.price===''?0:q*p);},0);
+  const dpct=parseFloat(document.getElementById('cDisc').value)||0;
+  const discAmt=Math.round(gross*dpct)/100;
+  const sub=Math.round((gross-discAmt)*100)/100;
   const total=sub*1.14975;
   const deposit=parseFloat(document.getElementById('cDeposit').value)||0;
   return {
@@ -729,6 +750,7 @@ function getCurrentData(){
     })(),
     payMethod:document.getElementById('cPay').value,
     shipAddr:document.getElementById('cShipAddr').value,
+    grossSub:+gross.toFixed(2),discPct:dpct,discAmt:+discAmt.toFixed(2),
     parcels:(function(){const e=document.getElementById('wbParcels');const v=e?parseInt(e.value,10):NaN;return isNaN(v)?'':v;})(),
     splitCash:parseFloat(document.getElementById('cSplitCash').value)||0,
     splitMethod2:document.getElementById('cSplit2').value,
@@ -757,6 +779,7 @@ function loadData(d){
 
   document.getElementById('cCuts').value=d.cuts||0;
   document.getElementById('cCutPrice').value=(d.cutPrice!=null&&d.cutPrice!=='')?d.cutPrice:20;
+  document.getElementById('cDisc').value=d.discPct||'';
   document.getElementById('cDeposit').value=d.deposit||'';
   sheets=(d.sheets&&d.sheets.length)?d.sheets.map(x=>({...x}))
         :[{desc:d.sheetDesc||'',qty:d.sheetQty||1,price:(d.sheetPrice?d.sheetPrice:'')}];
@@ -856,6 +879,7 @@ async function newInv(){
 
   document.getElementById('cCuts').value=0;
   document.getElementById('cCutPrice').value=20;
+  document.getElementById('cDisc').value='';
   document.getElementById('cDeposit').value='';
   document.getElementById('cPay').value='💵 Cash';
   document.getElementById('cSplitCash').value='';
@@ -1407,6 +1431,7 @@ document.getElementById('cNum').addEventListener('input',function(){saveNum(this
 document.getElementById('cPay').addEventListener('change',updateMeta);
 document.getElementById('cCuts').addEventListener('input',rebuildAll);
 document.getElementById('cCutPrice').addEventListener('input',rebuildAll);
+document.getElementById('cDisc').addEventListener('input',recalc);
 document.getElementById('cDeposit').addEventListener('input',recalc);
 axApplyLogo();
 rebuildAll();updateMeta();

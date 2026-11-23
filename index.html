@@ -271,6 +271,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 .wb-note{font-size:6.6pt;color:#5A6A80;line-height:1.45;margin-top:2.5mm}
 .wb-foot{text-align:center;margin-top:3mm;padding-top:2mm;border-top:1px solid #E3E8EF;
   color:#13C6E8;font-size:6.6pt;font-weight:600;letter-spacing:2.2px}
+.items-tbl tbody td:first-child input{font-weight:600;color:var(--ax-navy)}
+.items-tbl tbody td:first-child{font-weight:600}
 /* ---- revision 3 : sticker-style header ---- */
 .inv{font-family:Helvetica,Arial,sans-serif}
 .inv-header{display:flex;justify-content:space-between;align-items:flex-start;
@@ -618,11 +620,6 @@ function buildTable(tbId){
       +`<td id="sA_${tbId}_${i}" style="text-align:right;font-weight:700;color:#1A3A5C">${pr>0?fmt(pr*q):'\u2014'}</td>`;
     tb.appendChild(tr);
   });
-  if(cuts>0){
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="color:#555;font-style:italic">Frais de coupe<span class="en">Cutting fee</span></td><td style="text-align:center;color:#555">${cuts}</td><td style="text-align:right;color:#555">${fmt(cutRate())}</td><td style="text-align:right;font-weight:700;color:var(--ax-navy)">${fmt(cuts*cutRate())}</td>`;
-    tb.appendChild(tr);
-  }
   rows.forEach((r,i)=>{
     const tr=document.createElement('tr');
     const s1=tbId==='tb1'?`const e=document.getElementById('rD2_${i}');if(e)e.value=this.value;`:'';
@@ -636,6 +633,11 @@ function buildTable(tbId){
     tr.innerHTML=`<td><input type="text" ${dId} value="${esc(r.desc)}" placeholder="Description" oninput="rows[${i}].desc=this.value;${s1}markEmptyRows();" onchange="ensureRows()"></td><td><input type="number" ${qId} value="${esc(r.qty||'')}" min="1" placeholder="1" oninput="rows[${i}].qty=this.value;${s2}recalc()" style="text-align:center;width:40px"></td><td><input type="number" ${pId} value="${esc(r.price||'')}" step="0.01" min="0" placeholder="0.00" oninput="rows[${i}].price=this.value;${s3}recalc()" style="text-align:right;width:55px"></td><td id="a_${tbId}_${i}" style="text-align:right">—</td>`;
     tb.appendChild(tr);
   });
+  if(cuts>0){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:#555;font-style:italic">Frais de coupe<span class="en">Cutting fee</span></td><td style="text-align:center;color:#555">${cuts}</td><td style="text-align:right;color:#555">${fmt(cutRate())}</td><td style="text-align:right;font-weight:700;color:var(--ax-navy)">${fmt(cuts*cutRate())}</td>`;
+    tb.appendChild(tr);
+  }
 }
 
 function addSheet(){sheets.push({desc:'',qty:1,price:''});rebuildAll();}

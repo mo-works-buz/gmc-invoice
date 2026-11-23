@@ -604,6 +604,7 @@ function buildTable(tbId){
   sheets.forEach((sh,i)=>{
     const tr=document.createElement('tr');
     const q=Math.max(1,parseFloat(sh.qty)||1), pr=parseFloat(sh.price)||0;
+    tr.dataset.k='s'+i;
     if(!String(sh.desc||'').trim() && String(sh.price||'')==='') tr.className='empty-row';
     const k1=tbId==='tb1'?`const e=document.getElementById('sD2_${i}');if(e)e.value=this.value;`:'';
     const k2=tbId==='tb1'?`const e=document.getElementById('sQ2_${i}');if(e)e.value=this.value;`:'';
@@ -611,7 +612,7 @@ function buildTable(tbId){
     const i1=tbId==='tb2'?`id="sD2_${i}"`:'';
     const i2=tbId==='tb2'?`id="sQ2_${i}"`:'';
     const i3=tbId==='tb2'?`id="sP2_${i}"`:'';
-    tr.innerHTML=`<td><input type="text" ${i1} value="${esc(sh.desc)}" placeholder="e.g. Clear 5.5mm &mdash; 48&quot; x 96&quot;" oninput="sheets[${i}].desc=this.value;${k1}" style="width:100%;font-weight:600;color:#1A3A5C"></td>`
+    tr.innerHTML=`<td><input type="text" ${i1} value="${esc(sh.desc)}" placeholder="e.g. Clear 5.5mm &mdash; 48&quot; x 96&quot;" oninput="sheets[${i}].desc=this.value;${k1}markEmptyRows();" style="width:100%;font-weight:600;color:#1A3A5C"></td>`
       +`<td><input type="number" ${i2} value="${esc(sh.qty||'')}" min="1" placeholder="1" oninput="sheets[${i}].qty=this.value;${k2}recalc()" style="text-align:center;width:40px;font-weight:600;color:#1A3A5C"></td>`
       +`<td><input type="number" ${i3} value="${esc(sh.price||'')}" step="0.01" min="0" placeholder="0.00" oninput="sheets[${i}].price=this.value;${k3}recalc()" style="text-align:right;width:62px;font-weight:600;color:#1A3A5C"></td>`
       +`<td id="sA_${tbId}_${i}" style="text-align:right;font-weight:700;color:#1A3A5C">${pr>0?fmt(pr*q):'\u2014'}</td>`;
@@ -630,14 +631,29 @@ function buildTable(tbId){
     const dId=tbId==='tb2'?`id="rD2_${i}"`:'';
     const qId=tbId==='tb2'?`id="rQ2_${i}"`:'';
     const pId=tbId==='tb2'?`id="rP2_${i}"`:'';
+    tr.dataset.k='r'+i;
     if(!String(r.desc||'').trim() && String(r.price||'')==='') tr.className='empty-row';
-    tr.innerHTML=`<td><input type="text" ${dId} value="${esc(r.desc)}" placeholder="Description" oninput="rows[${i}].desc=this.value;${s1}" onchange="ensureRows()"></td><td><input type="number" ${qId} value="${esc(r.qty||'')}" min="1" placeholder="1" oninput="rows[${i}].qty=this.value;${s2}recalc()" style="text-align:center;width:40px"></td><td><input type="number" ${pId} value="${esc(r.price||'')}" step="0.01" min="0" placeholder="0.00" oninput="rows[${i}].price=this.value;${s3}recalc()" style="text-align:right;width:55px"></td><td id="a_${tbId}_${i}" style="text-align:right">—</td>`;
+    tr.innerHTML=`<td><input type="text" ${dId} value="${esc(r.desc)}" placeholder="Description" oninput="rows[${i}].desc=this.value;${s1}markEmptyRows();" onchange="ensureRows()"></td><td><input type="number" ${qId} value="${esc(r.qty||'')}" min="1" placeholder="1" oninput="rows[${i}].qty=this.value;${s2}recalc()" style="text-align:center;width:40px"></td><td><input type="number" ${pId} value="${esc(r.price||'')}" step="0.01" min="0" placeholder="0.00" oninput="rows[${i}].price=this.value;${s3}recalc()" style="text-align:right;width:55px"></td><td id="a_${tbId}_${i}" style="text-align:right">—</td>`;
     tb.appendChild(tr);
   });
 }
 
 function addSheet(){sheets.push({desc:'',qty:1,price:''});rebuildAll();}
 
+/* A row is hidden on print while it is empty. Re-evaluate that on every
+   keystroke, otherwise text typed into a row keeps the row hidden until
+   the table happens to be rebuilt. */
+function markEmptyRows(){
+  ['tb1','tb2'].forEach(function(id){
+    const tb=document.getElementById(id); if(!tb)return;
+    tb.querySelectorAll('tr[data-k]').forEach(function(tr){
+      const k=tr.dataset.k, i=parseInt(k.slice(1),10);
+      const o=(k.charAt(0)==='s')?sheets[i]:rows[i];
+      const empty=!o||(!String(o.desc||'').trim() && String(o.price||'')==='');
+      tr.classList.toggle('empty-row',empty);
+    });
+  });
+}
 function rebuildAll(){buildTable('tb1');buildTable('tb2');recalc();}
 
 /* Unlimited description lines: always keep one spare blank row at the end,
@@ -698,6 +714,7 @@ function recalc(){
     }
   });
   if(document.getElementById('cPay').value==='🔀 Split Payment')updateMeta();
+  markEmptyRows();
 }
 
 function updateMeta(){

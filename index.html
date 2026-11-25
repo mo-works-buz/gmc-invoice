@@ -298,7 +298,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 </head>
 <body>
 <div class="screen-controls">
-  <div class="sc-group" style="width:80px"><label>Invoice #</label><input id="cNum" type="text"></div>
+  <div class="sc-group" style="width:90px"><label title="Set by the system — always the next number in sequence">Invoice # 🔒</label><input id="cNum" type="text" readonly tabindex="-1" style="background:#0a1726;color:#13C6E8;font-weight:700;cursor:not-allowed"></div>
   <div class="sc-group" style="width:130px"><label>Date</label><input id="cDate" type="date"></div>
   <div class="sc-group" style="width:150px"><label>Customer Name</label><input id="cCust" type="text" placeholder="Client name"></div>
   <div class="sc-group" style="width:120px"><label>Phone</label><input id="cPhone" type="text" placeholder="514-xxx-xxxx"></div>
@@ -812,17 +812,25 @@ function loadData(d){
 async function saveInvoice(){
   const d=getCurrentData();
   if(!d.num||d.customer==='—'){alert('Fill in Invoice # and Customer Name first.');return;}
-  // localStorage
+  const btn=document.querySelector('.sc-btn.save');
+  const wanted=d.num;
+  if(btn){btn.disabled=true;btn.textContent='\u23F3 Saving\u2026';}
+  const res=await claimNumber(d,wanted);
+  if(btn){btn.disabled=false;btn.innerHTML='\uD83D\uDCBE Save';}
+  if(!res.ok){setArchStatus(false);alert('\u26A0\uFE0F Not saved \u2014 '+res.err);return;}
+  setArchStatus(true);
+  document.getElementById('cNum').value=res.num;
+  loadedNum=res.num;
+  saveNum(res.num);
+  updateMeta();
   const arch=JSON.parse(localStorage.getItem('gmc_inv_archive')||'{}');
-  arch[d.num]=d;
+  arch[res.num]=d;
   localStorage.setItem('gmc_inv_archive',JSON.stringify(arch));
-  // Firebase
-  try{
-    const res=await fetch(FB+'/invoices/'+d.num+'.json',{method:'PUT',body:JSON.stringify(d),headers:{'Content-Type':'application/json'}});
-    if(res.ok){setArchStatus(true);}
-    else{const err=await res.text();setArchStatus(false);alert('⚠️ Firebase Error '+res.status+':\n'+err);return;}
-  }catch(e){setArchStatus(false);alert('⚠️ Network Error: '+e.message);return;}
-  alert('✅ Invoice #'+d.num+' saved!');
+  if(res.changed){
+    alert('\u2705 Saved as invoice #'+res.num+'\n\n\u26A0\uFE0F #'+wanted+' was taken on another device while you were typing.\nThis invoice kept the sequence and took the next number.');
+  }else{
+    alert('\u2705 Invoice #'+res.num+' saved!');
+  }
   renderArchive();
 }
 
@@ -864,7 +872,7 @@ function renderArchive(){
 
 function openArchiveInv(num){
   const arch=JSON.parse(localStorage.getItem('gmc_inv_archive')||'{}');
-  if(arch[num]){loadData(arch[num]);showTab('invoice');}
+  if(arch[num]){loadData(arch[num]);loadedNum=String(num);showTab('invoice');}
 }
 
 async function deleteArchiveInv(num){
@@ -876,18 +884,78 @@ async function deleteArchiveInv(num){
   renderArchive();
 }
 
-async function newInv(){
-  /* رقم الفاتورة تلقائي: يفتح رقم جديد = أعلى رقم موجود + 1 */
-  let mx=parseInt(document.getElementById('cNum').value||'0',10)||0;
+/* ---------- invoice numbering ----------
+   Two people can have the app open at once. Nothing is reserved while typing;
+   the number is settled at the moment of saving using Firebase's ETag
+   compare-and-set, so the same number can never be written twice. */
+let loadedNum='';            // number loaded from the archive (edit mode)
+
+async function highestSavedNumber(){
+  let mx=0;
   try{
-    const r=await fetch(FB+'/invoices.json?shallow=true');const fb=await r.json()||{};
-    Object.keys(fb).forEach(k=>{const n=parseInt(k,10);if(n>mx)mx=n;});
+    const r=await fetch(FB+'/invoices.json?shallow=true&_='+Date.now());
+    const fb=await r.json()||{};
+    Object.keys(fb).forEach(function(k){const n=parseInt(k,10);if(n>mx)mx=n;});
   }catch(e){}
   try{
     const local=JSON.parse(localStorage.getItem('gmc_inv_archive')||'{}');
-    Object.values(local).forEach(d=>{const n=parseInt((d&&d.num)||'0',10);if(n>mx)mx=n;});
+    Object.values(local).forEach(function(d){const n=parseInt((d&&d.num)||'0',10);if(n>mx)mx=n;});
   }catch(e){}
-  const next=String(mx+1);
+  if(!mx){const stored=parseInt(getNum(),10); if(stored>0)mx=stored-1;}
+  return mx;
+}
+async function nextFreeNumber(){ return (await highestSavedNumber())+1; }
+
+/* Write the invoice under the first number nobody else holds.
+   if-match on a null ETag succeeds only while the slot is still empty. */
+async function claimNumber(d,wanted){
+  /* Strict sequence, no gaps: a NEW invoice always takes highest+1.
+     What the screen happens to show is irrelevant — it may be stale.
+     An invoice opened from the archive keeps its own number. */
+  const editing=String(loadedNum||'')!=='';
+  let n=editing?parseInt(loadedNum,10):await nextFreeNumber();
+  if(!(n>0)) n=await nextFreeNumber();
+  for(let tries=0;tries<25;tries++){
+    const url=FB+'/invoices/'+n+'.json';
+    let etag='null_etag', exists=false;
+    try{
+      const g=await fetch(url+'?_='+Date.now(),{headers:{'X-Firebase-ETag':'true'}});
+      etag=g.headers.get('ETag')||'null_etag';
+      const body=await g.json();
+      exists=(body!==null && body!==undefined);
+    }catch(e){ return {ok:false,err:'network'}; }
+    if(exists && !editing){ n=await nextFreeNumber(); continue; }   // someone claimed it first
+    d.num=String(n);
+    try{
+      const p=await fetch(url,{method:'PUT',
+        headers:{'Content-Type':'application/json','if-match':etag},
+        body:JSON.stringify(d)});
+      if(p.status===412){ n=await nextFreeNumber(); continue; }     // lost the race — take the new top
+      if(!p.ok) return {ok:false,err:'HTTP '+p.status+': '+(await p.text())};
+      return {ok:true,num:String(n),changed:String(n)!==String(wanted)};
+    }catch(e){ return {ok:false,err:'network'}; }
+  }
+  return {ok:false,err:'could not find a free invoice number'};
+}
+
+/* Refresh the suggested number while the form is still untouched,
+   so two people do not sit on the same stale number. */
+async function refreshSuggestion(){
+  try{
+    if(String(loadedNum||'')!=='') return;
+    if(document.getElementById('cCust').value.trim()) return;
+    const n=String(await nextFreeNumber());
+    const f=document.getElementById('cNum');
+    if(f.value!==n){ f.value=n; saveNum(n); updateMeta(); }
+  }catch(e){}
+}
+async function newInv(){
+  /* رقم الفاتورة تلقائي: يفتح رقم جديد = أعلى رقم موجود + 1 */
+  /* The number shown is only a SUGGESTION. It is never reserved and never
+     counted, so opening the app or pressing New burns no numbers. The real
+     number is claimed atomically at save time (see claimNumber). */
+  const next=String(await nextFreeNumber());
+  loadedNum='';
   document.getElementById('cNum').value=next;
   saveNum(next);
   document.getElementById('cCust').value='';
@@ -1445,8 +1513,7 @@ function printCutOrder(){
 if(!localStorage.getItem('gmc_inv_reset_v2')){saveNum(138699);localStorage.setItem('gmc_inv_reset_v2','1');}
 document.getElementById('cNum').value=getNum();
 document.getElementById('cDate').value=today();
-['cNum','cDate','cCust','cPhone','cNotes'].forEach(id=>document.getElementById(id).addEventListener('input',updateMeta));
-document.getElementById('cNum').addEventListener('input',function(){saveNum(this.value);});
+['cDate','cCust','cPhone','cNotes'].forEach(id=>document.getElementById(id).addEventListener('input',updateMeta));
 document.getElementById('cPay').addEventListener('change',updateMeta);
 document.getElementById('cCuts').addEventListener('input',rebuildAll);
 document.getElementById('cCutPrice').addEventListener('input',rebuildAll);
@@ -1454,6 +1521,8 @@ document.getElementById('cDisc').addEventListener('input',recalc);
 document.getElementById('cDeposit').addEventListener('input',recalc);
 axApplyLogo();
 rebuildAll();updateMeta();
+setInterval(refreshSuggestion,30000);
+window.addEventListener('focus',refreshSuggestion);
 rDefaultDates();
 loadArchive();
 

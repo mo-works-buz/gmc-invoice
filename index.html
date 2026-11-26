@@ -690,9 +690,10 @@ async function loadRole(){
   const cn=document.getElementById('cNum');
   cn.readOnly=(role!=='manager');
   cn.tabIndex=(role==='manager')?0:-1;
+  cn.style.cursor=(role==='manager')?'text':'not-allowed';
   const lb=cn.parentElement&&cn.parentElement.querySelector('label');
   if(lb)lb.textContent=(role==='manager')?'Invoice #':'Invoice # \ud83d\udd12';
-  cn.addEventListener('input',function(){window.__cNumTyped=true;});
+  cn.addEventListener('input',function(){window.__cNumTyped=true;updateMeta();});
   document.body.classList.toggle('role-employee',role==='employee');
   document.getElementById('whoText').textContent=(AUTH.email||'')+'  \u00b7  '+(role==='manager'?'Gérant · Manager':'Employé · Employee');
 }

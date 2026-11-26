@@ -395,7 +395,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
         </div>
       </div>
       <div class="meta-row">
-        <div class="meta-box"><div class="ml">Facturé à<span class="en">Bill To</span></div><div class="mv" id="dCust1">—</div><div class="mv2" id="dPhone1"></div></div>
+        <div class="meta-box"><div class="ml">Facturé à<span class="en">Bill To</span></div><div class="mv" id="dCust1">—</div><div class="mv2" id="dPhone1"></div><div class="mv2" id="dAddr1"></div></div>
         <div class="meta-box"><div class="ml">Remarques<span class="en">Notes</span></div><div class="mv" id="dNotes1" style="font-size:8pt">—</div></div>
         <div class="meta-box"><div class="ml">Paiement<span class="en">Payment</span></div><div class="mv" id="dPay1">💵 Cash</div></div>
       </div>
@@ -451,7 +451,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
         </div>
       </div>
       <div class="meta-row">
-        <div class="meta-box"><div class="ml">Facturé à<span class="en">Bill To</span></div><div class="mv" id="dCust2">—</div><div class="mv2" id="dPhone2"></div></div>
+        <div class="meta-box"><div class="ml">Facturé à<span class="en">Bill To</span></div><div class="mv" id="dCust2">—</div><div class="mv2" id="dPhone2"></div><div class="mv2" id="dAddr2"></div></div>
         <div class="meta-box"><div class="ml">Remarques<span class="en">Notes</span></div><div class="mv" id="dNotes2" style="font-size:8pt">—</div></div>
         <div class="meta-box"><div class="ml">Paiement<span class="en">Payment</span></div><div class="mv" id="dPay2">💵 Cash</div></div>
       </div>
@@ -1097,6 +1097,7 @@ function updateMeta(){
     pay='💵 Cash $'+cashPart.toFixed(2)+'  +  '+m2+' $'+rest.toFixed(2);
   }
   const notes=document.getElementById('cNotes').value||'—';
+  const addr=document.getElementById('cShipAddr').value.trim();
   [1,2].forEach(c=>{
     document.getElementById('dNum'+c).textContent=num;
     document.getElementById('dDate'+c).textContent=date;
@@ -1104,6 +1105,7 @@ function updateMeta(){
     document.getElementById('dPhone'+c).textContent=phone;
     document.getElementById('dPay'+c).textContent=pay;
     document.getElementById('dNotes'+c).textContent=notes;
+    document.getElementById('dAddr'+c).textContent=addr?('Livraison · Delivery: '+addr):'';
   });
 }
 
@@ -1907,7 +1909,7 @@ function printCutOrder(){
 if(!localStorage.getItem('gmc_inv_reset_v2')){saveNum(138699);localStorage.setItem('gmc_inv_reset_v2','1');}
 document.getElementById('cNum').value=getNum();
 document.getElementById('cDate').value=today();
-['cDate','cCust','cPhone','cNotes'].forEach(id=>document.getElementById(id).addEventListener('input',updateMeta));
+['cDate','cCust','cPhone','cNotes','cShipAddr'].forEach(id=>document.getElementById(id).addEventListener('input',updateMeta));
 document.getElementById('cPay').addEventListener('change',updateMeta);
 document.getElementById('cCuts').addEventListener('input',rebuildAll);
 document.getElementById('cCutPrice').addEventListener('input',rebuildAll);

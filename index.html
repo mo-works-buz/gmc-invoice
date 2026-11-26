@@ -13,6 +13,9 @@
 #lgOv button.lg-go{width:100%;padding:11px;background:#0A1A33;color:#13C6E8;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer}
 .role-employee .btn-del{display:none!important}
 .role-employee #btnAccounts{display:none!important}
+.ord-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ord-f label{display:block;font-size:.7rem;font-weight:700;color:#5A6A80;margin-bottom:3px}
+.ord-f input,.ord-f select{width:100%;padding:8px;border:1px solid #E3E8EF;border-radius:6px;box-sizing:border-box;font-size:.85rem}
 .inv{font-family:"Montserrat",Arial,Helvetica,sans-serif;font-weight:400;}
 
 *{margin:0;padding:0;box-sizing:border-box}
@@ -304,17 +307,17 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 <div id="lgOv" style="display:flex;position:fixed;inset:0;background:#0A1A33;z-index:9999;align-items:center;justify-content:center;font-family:Montserrat,Arial,sans-serif">
   <div style="background:#fff;border-radius:14px;padding:28px 26px;width:320px;box-shadow:0 10px 40px rgba(0,0,0,.35)">
     <div style="font-weight:800;color:#0A1A33;font-size:18px">GMC Invoice</div>
-    <div style="color:#5A6A80;font-size:12px;margin:2px 0 18px">سجّل دخولك · Sign in</div>
+    <div style="color:#5A6A80;font-size:12px;margin:2px 0 18px">Connexion · Sign in</div>
     <input id="lgEmail" type="email" placeholder="Email" autocomplete="username">
     <input id="lgPass" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="lg-go" onclick="doLogin()">دخول · Sign in</button>
+    <button class="lg-go" onclick="doLogin()">Connexion · Sign in</button>
     <div id="lgErr" style="color:#c62828;font-size:12px;min-height:16px;margin-top:8px"></div>
-    <a href="#" onclick="doReset();return false;" style="font-size:12px;color:#13C6E8">نسيت كلمة المرور؟ · Forgot password</a>
+    <a href="#" onclick="doReset();return false;" style="font-size:12px;color:#13C6E8">Mot de passe oublié? · Forgot password</a>
   </div>
 </div>
 <div id="whoBar" style="display:none;align-items:center;gap:10px;justify-content:flex-end;padding:6px 10px;background:#0A1A33;color:#cfd8e3;font-size:12px">
   <span id="whoText"></span>
-  <button onclick="logout()" style="background:none;border:1px solid #13C6E8;color:#13C6E8;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px">خروج</button>
+  <button onclick="logout()" style="background:none;border:1px solid #13C6E8;color:#13C6E8;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px">Déconnexion</button>
 </div>
 <div class="screen-controls">
   <div class="sc-group" style="width:90px"><label title="Set by the system — always the next number in sequence">Invoice # 🔒</label><input id="cNum" type="text" readonly tabindex="-1" style="background:#0a1726;color:#13C6E8;font-weight:700;cursor:not-allowed"></div>
@@ -364,6 +367,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
   <button onclick="showTab('cutorder')">✂️ Cut Order</button>
   <button onclick="showTab('waybill')">🚚 Waybill</button>
   <button onclick="showTab('report')">📊 Report</button>
+  <button onclick="showTab('order')">🛒 Order</button>
   <button id="btnAccounts" onclick="showTab('accounts')">👥 Accounts</button>
 </div>
 
@@ -589,16 +593,44 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#dde2ea;padding:20px}
 
 <div class="tab-panel" id="tab-accounts">
   <div class="archive-wrap">
-    <h3>👥 الحسابات والصلاحيات · Accounts</h3>
+    <h3>👥 Comptes et accès · Accounts</h3>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:12px 0 16px">
       <div><label style="font-size:.7rem;font-weight:700;color:#5A6A80">Email</label><br><input id="accEmail" type="email" style="padding:7px 9px;border:1px solid #E3E8EF;border-radius:6px;width:230px"></div>
-      <div><label style="font-size:.7rem;font-weight:700;color:#5A6A80">كلمة مرور مؤقتة (6 حروف+)</label><br><input id="accPass" type="text" style="padding:7px 9px;border:1px solid #E3E8EF;border-radius:6px;width:180px"></div>
-      <div><label style="font-size:.7rem;font-weight:700;color:#5A6A80">الصلاحية</label><br><select id="accRole" style="padding:7px 9px;border:1px solid #E3E8EF;border-radius:6px"><option value="employee">موظف: ينشئ فواتير بس</option><option value="manager">مدير: كل الصلاحيات</option></select></div>
-      <button class="btn-sm btn-open" onclick="accCreate()">➕ إنشاء الحساب</button>
+      <div><label style="font-size:.7rem;font-weight:700;color:#5A6A80">Mot de passe temporaire (6+ car.) · Temp password</label><br><input id="accPass" type="text" style="padding:7px 9px;border:1px solid #E3E8EF;border-radius:6px;width:180px"></div>
+      <div><label style="font-size:.7rem;font-weight:700;color:#5A6A80">Rôle · Role</label><br><select id="accRole" style="padding:7px 9px;border:1px solid #E3E8EF;border-radius:6px"><option value="employee">Employé : crée des factures seulement · Employee: creates invoices only</option><option value="manager">Gérant : tous les droits · Manager: full access</option></select></div>
+      <button class="btn-sm btn-open" onclick="accCreate()">➕ Créer le compte · Create account</button>
     </div>
     <table class="arch-tbl">
-      <thead><tr><th>الإيميل</th><th>الصلاحية</th><th>UID</th><th></th></tr></thead>
+      <thead><tr><th>Courriel · Email</th><th>Rôle · Role</th><th>UID</th><th></th></tr></thead>
       <tbody id="accBody"></tbody>
+    </table>
+  </div>
+</div>
+<div class="tab-panel" id="tab-order">
+  <div class="archive-wrap" style="max-width:860px">
+    <h3>🛒 Nouvelle commande · New Order</h3>
+    <div class="ord-grid" style="margin:12px 0">
+      <div class="ord-f"><label>1. Article · Item</label><select id="oFam" onchange="ordOnFam()"></select></div>
+      <div class="ord-f"><label>2. Épaisseur · Thickness</label><select id="oThk" onchange="ordOnThk()"></select></div>
+      <div class="ord-f"><label>3. Couleur · Color / Code</label><select id="oCode" onchange="ordOnCode()"></select></div>
+      <div class="ord-f"><label>4. Livraison ou ramassage · Delivery / Pick Up</label><select id="oMethod" onchange="ordOnMethod()"><option value="Pick Up">Pick Up — Ramassage</option><option value="Delivery">Delivery — Livraison</option></select></div>
+      <div class="ord-f" id="oZoneBox" style="display:none"><label>Zone de livraison · Zone</label><select id="oZone" onchange="ordPreview()"></select></div>
+      <div class="ord-f"><label>Nombre de feuilles · Sheets</label><input id="oQty" type="number" min="1" value="1" oninput="ordPreview()"></div>
+      <div class="ord-f"><label>Nombre de coupes · Cuts</label><input id="oCuts" type="number" min="0" value="0" oninput="ordPreview()"></div>
+    </div>
+    <h4>5. Client · Customer</h4>
+    <div class="ord-grid" style="margin:10px 0">
+      <div class="ord-f"><label>Nom · Name</label><input id="oName"></div>
+      <div class="ord-f"><label>Téléphone · Phone</label><input id="oPhone"></div>
+      <div class="ord-f" style="grid-column:1/-1"><label>Adresse (livraison) · Address</label><input id="oAddr"></div>
+      <div class="ord-f" style="grid-column:1/-1"><label>Notes</label><input id="oNotes"></div>
+    </div>
+    <div id="oPrev" style="margin:12px 0;font-weight:700;color:#0A1A33"></div>
+    <button class="btn-sm btn-open" onclick="ordSave()">💾 Enregistrer · Save Order</button>
+    <h4 style="margin-top:22px">Commandes enregistrées · Saved orders</h4>
+    <table class="arch-tbl">
+      <thead><tr><th>N°</th><th>Date</th><th>Article</th><th>Client</th><th>Total</th><th></th></tr></thead>
+      <tbody id="oBody"></tbody>
     </table>
   </div>
 </div>
@@ -625,9 +657,9 @@ window.fetch=async function(input,opts){
 };
 function authErrText(j){
   const m=(j&&j.error&&j.error.message)||'';
-  const map={EMAIL_EXISTS:'الإيميل مسجل قبل',WEAK_PASSWORD:'كلمة المرور ضعيفة (6 حروف على الأقل)',INVALID_EMAIL:'الإيميل غير صحيح',EMAIL_NOT_FOUND:'الإيميل غير مسجل',INVALID_PASSWORD:'كلمة المرور غلط',INVALID_LOGIN_CREDENTIALS:'الإيميل أو كلمة المرور غلط',TOO_MANY_ATTEMPTS_TRY_LATER:'محاولات كثيرة، جرّب بعدين'};
+  const map={EMAIL_EXISTS:'Ce courriel existe déjà · Email already exists',WEAK_PASSWORD:'Mot de passe trop faible (6 car. min.) · Weak password (6 chars min.)',INVALID_EMAIL:'Courriel invalide · Invalid email',EMAIL_NOT_FOUND:'Courriel inconnu · Email not found',INVALID_PASSWORD:'Mot de passe incorrect · Wrong password',INVALID_LOGIN_CREDENTIALS:'Courriel ou mot de passe incorrect · Wrong email or password',TOO_MANY_ATTEMPTS_TRY_LATER:'Trop de tentatives, réessayez plus tard · Too many attempts, try later'};
   const k=Object.keys(map).find(function(x){return m.indexOf(x)===0;});
-  return k?map[k]:(m||'خطأ');
+  return k?map[k]:(m||'Erreur · Error');
 }
 function authSaveLocal(){localStorage.setItem(AUTH_KEY,JSON.stringify({refreshToken:AUTH.refreshToken,uid:AUTH.uid,email:AUTH.email}));}
 function authClearLocal(){AUTH.idToken='';AUTH.refreshToken='';AUTH.expiresAt=0;AUTH.uid='';AUTH.email='';AUTH.role='';localStorage.removeItem(AUTH_KEY);}
@@ -662,7 +694,7 @@ async function loadRole(){
   if(lb)lb.textContent=(role==='manager')?'Invoice #':'Invoice # \ud83d\udd12';
   cn.addEventListener('input',function(){window.__cNumTyped=true;});
   document.body.classList.toggle('role-employee',role==='employee');
-  document.getElementById('whoText').textContent=(AUTH.email||'')+'  \u00b7  '+(role==='manager'?'مدير':'موظف');
+  document.getElementById('whoText').textContent=(AUTH.email||'')+'  \u00b7  '+(role==='manager'?'Gérant · Manager':'Employé · Employee');
 }
 function showLogin(on){document.getElementById('lgOv').style.display=on?'flex':'none';}
 function showApp(){document.getElementById('whoBar').style.display='flex';}
@@ -671,20 +703,20 @@ async function doLogin(){
   const pass=document.getElementById('lgPass').value;
   const err=document.getElementById('lgErr');
   err.textContent='';
-  if(!email||!pass){err.textContent='اكتب الإيميل وكلمة المرور.';return;}
+  if(!email||!pass){err.textContent='Entrez le courriel et le mot de passe. · Enter email and password.';return;}
   try{await authSignIn(email,pass);}
-  catch(e){err.textContent='الإيميل أو كلمة المرور غلط.';return;}
+  catch(e){err.textContent='Courriel ou mot de passe incorrect. · Wrong email or password.';return;}
   try{await loadRole();}
-  catch(e){authClearLocal();err.textContent='هذا الحساب ما له صلاحية. كلّم المدير.';return;}
+  catch(e){authClearLocal();err.textContent='Ce compte n’a pas de droits. Contactez le gérant. · This account has no access. Contact the manager.';return;}
   document.getElementById('lgPass').value='';
   showLogin(false);showApp();await appInit();
 }
 async function doReset(){
   const email=document.getElementById('lgEmail').value.trim();
-  if(!email){alert('اكتب الإيميل أول.');return;}
+  if(!email){alert('Entrez d’abord le courriel. · Enter the email first.');return;}
   const r=await _fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key='+FB_API_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requestType:'PASSWORD_RESET',email:email})});
-  if(r.ok)alert('✅ أرسلنا رابط تغيير كلمة المرور على الإيميل.');
-  else alert('تعذر الإرسال: '+authErrText(await r.json()));
+  if(r.ok)alert('✅ Lien de réinitialisation envoyé par courriel. · Reset link sent by email.');
+  else alert('Échec de l’envoi : '+authErrText(await r.json()));
 }
 function logout(){authClearLocal();location.reload();}
 async function authBoot(){
@@ -701,6 +733,152 @@ async function authBoot(){
   showLogin(true);
 }
 
+/* ===== ORDER TAB ===== */
+const PRODUCTS=[
+ {code:'CLR000ST03',fam:'Clear',famAr:'Transparent · Clear',thk:3,size:'48x96',color:'Clear',price:125},
+ {code:'CLR000ST45',fam:'Clear',famAr:'Transparent · Clear',thk:4.5,size:'48x96',color:'Clear',price:165},
+ {code:'CLR000ST55',fam:'Clear',famAr:'Transparent · Clear',thk:5.5,size:'48x96',color:'Clear',price:185},
+ {code:'CLR000ST12',fam:'Clear',famAr:'Transparent · Clear',thk:12,size:'48x96',color:'Clear',price:485},
+ {code:'CLR000LS45',fam:'Clear',famAr:'Transparent · Clear',thk:4.5,size:'48x120',color:'Clear',price:185},
+ {code:'CLR000LS55',fam:'Clear',famAr:'Transparent · Clear',thk:5.5,size:'48x120',color:'Clear',price:215},
+ {code:'FRS005ST03',fam:'Frosted',famAr:'Givré · Frosted',thk:3,size:'48x96',color:'Frosted',price:185},
+ {code:'FRS005ST45',fam:'Frosted',famAr:'Givré · Frosted',thk:4.5,size:'48x96',color:'Frosted',price:215},
+ {code:'WHT425ST03',fam:'White',famAr:'Blanc · White',thk:3,size:'48x96',color:'White',price:185},
+ {code:'WHT425ST45',fam:'White',famAr:'Blanc · White',thk:4.5,size:'48x96',color:'White',price:235},
+ {code:'WHT544ST45',fam:'White',famAr:'Blanc · White',thk:4.5,size:'48x96',color:'White (544)',price:235},
+ {code:'BLK502ST03',fam:'Black',famAr:'Noir · Black',thk:3,size:'48x96',color:'Black',price:185},
+ {code:'BLK502ST45',fam:'Black',famAr:'Noir · Black',thk:4.5,size:'48x96',color:'Black',price:235},
+ {code:'SBR522ST03',fam:'Smoke',famAr:'Fumé · Smoked',thk:3,size:'48x96',color:'Smoke Brown',price:185},
+ {code:'SBR522ST45',fam:'Smoke',famAr:'Fumé · Smoked',thk:4.5,size:'48x96',color:'Smoke Brown',price:235},
+ {code:'SGR919ST45',fam:'Smoke',famAr:'Fumé · Smoked',thk:4.5,size:'48x96',color:'Smoke Grey',price:285},
+ {code:'SBK301ST45',fam:'Smoke',famAr:'Fumé · Smoked',thk:4.5,size:'48x96',color:'Smoke Blue',price:255},
+ {code:'SGN362ST45',fam:'Smoke',famAr:'Fumé · Smoked',thk:4.5,size:'48x96',color:'Smoke Green',price:255},
+ {code:'SYL212ST45',fam:'Smoke',famAr:'Fumé · Smoked',thk:4.5,size:'48x96',color:'Smoke Yellow',price:255},
+ {code:'GMR004ST45',fam:'Mirror',famAr:'Miroir · Mirror',thk:4.5,size:'48x96',color:'Gold Mirror',price:325},
+ {code:'SMR001ST45',fam:'Mirror',famAr:'Miroir · Mirror',thk:4.5,size:'48x96',color:'Silver Mirror',price:325},
+ {code:'GRY500ST45',fam:'Colored',famAr:'Couleur · Colored',thk:4.5,size:'48x96',color:'Grey',price:235},
+ {code:'BLU324ST45',fam:'Colored',famAr:'Couleur · Colored',thk:4.5,size:'48x96',color:'Blue',price:235},
+ {code:'BRN881ST45',fam:'Colored',famAr:'Couleur · Colored',thk:4.5,size:'48x96',color:'Brown',price:235},
+ {code:'GRN184ST45',fam:'Colored',famAr:'Couleur · Colored',thk:4.5,size:'48x96',color:'Green',price:235},
+ {code:'PUR377ST45',fam:'Colored',famAr:'Couleur · Colored',thk:4.5,size:'48x96',color:'Purple',price:235},
+ {code:'RED813ST45',fam:'Colored',famAr:'Couleur · Colored',thk:4.5,size:'48x96',color:'Red',price:235},
+ {code:'OYL237ST45',fam:'Colored',famAr:'Couleur · Colored',thk:4.5,size:'48x96',color:'Opaque Yellow',price:235},
+ {code:'LYL215ST45',fam:'Colored',famAr:'Couleur · Colored',thk:4.5,size:'48x96',color:'Light Yellow',price:235},
+ {code:'POL000ST06',fam:'Polycarbonate',famAr:'Polycarbonate',thk:6,size:'48x96',color:'Clear',price:365}
+];
+const ORD_CUT=20;
+const ORD_ZONES=[{id:'local',label:'Livraison locale · Local',fee:45},{id:'extended',label:'Livraison étendue · Extended',fee:60},{id:'out',label:'Hors zone · Out of zone',fee:100}];
+function ordInit(){
+  const seen=[]; PRODUCTS.forEach(p=>{ if(!seen.some(x=>x.fam===p.fam)) seen.push({fam:p.fam,label:p.famAr}); });
+  document.getElementById('oFam').innerHTML=seen.map(x=>'<option value="'+x.fam+'">'+x.label+'</option>').join('');
+  document.getElementById('oZone').innerHTML=ORD_ZONES.map(x=>'<option value="'+x.id+'">'+x.label+' ($'+x.fee+')</option>').join('');
+  ordOnFam();
+}
+function ordOnFam(){
+  const fam=document.getElementById('oFam').value;
+  const thks=[...new Set(PRODUCTS.filter(p=>p.fam===fam).map(p=>p.thk))].sort((a,b)=>a-b);
+  document.getElementById('oThk').innerHTML=thks.map(t=>'<option value="'+t+'">'+t+' mm</option>').join('');
+  ordOnThk();
+}
+function ordOnThk(){
+  const fam=document.getElementById('oFam').value;
+  const thk=parseFloat(document.getElementById('oThk').value);
+  const list=PRODUCTS.filter(p=>p.fam===fam&&p.thk===thk);
+  document.getElementById('oCode').innerHTML=list.map(p=>'<option value="'+p.code+'">'+p.color+' · '+p.size+' · '+p.code+' — $'+p.price+'</option>').join('');
+  ordPreview();
+}
+function ordOnCode(){ ordPreview(); }
+function ordOnMethod(){
+  const d=document.getElementById('oMethod').value==='Delivery';
+  document.getElementById('oZoneBox').style.display=d?'block':'none';
+  ordPreview();
+}
+function ordCurrent(){ const code=document.getElementById('oCode').value; return PRODUCTS.find(p=>p.code===code)||null; }
+function ordTotals(){
+  const p=ordCurrent();
+  const q=Math.max(1,parseInt(document.getElementById('oQty').value,10)||1);
+  const c=Math.max(0,parseInt(document.getElementById('oCuts').value,10)||0);
+  const isDel=document.getElementById('oMethod').value==='Delivery';
+  const z=ORD_ZONES.find(x=>x.id===document.getElementById('oZone').value);
+  const sheets=p?p.price*q:0, cuts=c*ORD_CUT, del=(isDel&&z)?z.fee:0;
+  return {p:p,q:q,c:c,sheets:sheets,cuts:cuts,del:del,total:sheets+cuts+del,isDel:isDel,zone:(isDel&&z)?z.id:''};
+}
+function ordPreview(){
+  const t=ordTotals();
+  document.getElementById('oPrev').textContent=t.p?('Feuilles $'+t.sheets.toFixed(2)+' + Coupe $'+t.cuts.toFixed(2)+' + Livraison $'+t.del.toFixed(2)+' = $'+t.total.toFixed(2)+'  (avant taxes · before tax)'):'';
+}
+function ordClearForm(){
+  ['oName','oPhone','oAddr','oNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('oQty').value=1; document.getElementById('oCuts').value=0;
+  ordPreview();
+}
+async function ordSave(){
+  const t=ordTotals();
+  if(!t.p){alert('Choisissez l’article, l’épaisseur et la couleur. · Choose item, thickness and color.');return;}
+  const name=document.getElementById('oName').value.trim();
+  if(!name){alert('Entrez le nom du client. · Enter the customer name.');return;}
+  const now=new Date();
+  const id='ORD-'+now.toISOString().slice(0,10).replace(/-/g,'')+'-'+now.toTimeString().slice(0,8).replace(/:/g,'')+'-'+Math.floor(Math.random()*900+100);
+  const o={id:id,date:today(),code:t.p.code,fam:t.p.fam,
+    desc:t.p.fam+' '+t.p.thk+'mm — '+t.p.color+' '+t.p.size+' ('+t.p.code+')',
+    thk:t.p.thk,color:t.p.color,size:t.p.size,unitPrice:t.p.price,
+    sheets:t.q,cuts:t.c,cutRate:ORD_CUT,method:t.isDel?'Delivery':'Pick Up',zone:t.zone,
+    deliveryFee:t.del,total:t.total,customer:name,
+    phone:document.getElementById('oPhone').value.trim(),
+    address:t.isDel?document.getElementById('oAddr').value.trim():'',
+    notes:document.getElementById('oNotes').value.trim(),
+    status:'new',createdBy:AUTH.email||'',createdAt:now.toISOString()};
+  try{
+    const r=await fetch(FB+'/orders/'+id+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});
+    if(!r.ok){alert('Échec de l’enregistrement. HTTP '+r.status);return;}
+    alert('✅ Commande enregistrée '+id);
+    ordClearForm(); ordLoad();
+  }catch(e){alert('Network error: '+e.message);}
+}
+async function ordLoad(){
+  const body=document.getElementById('oBody');
+  body.innerHTML='<tr><td colspan="6">…</td></tr>';
+  try{
+    const j=(await (await fetch(FB+'/orders.json')).json())||{};
+    const list=Object.values(j).filter(x=>x&&x.id).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+    window.__orders=list;
+    body.innerHTML='';
+    if(!list.length){body.innerHTML='<tr><td colspan="6"><div class="arch-empty">Aucune commande pour l’instant. · No orders yet.</div></td></tr>';return;}
+    list.forEach(o=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML='<td>'+esc(o.id)+'</td><td>'+esc(o.date||'')+'</td>'
+        +'<td>'+esc(o.desc||'')+'<div style="font-size:.7rem;color:#5A6A80">'+esc(o.method||'')+'</div></td>'
+        +'<td>'+esc(o.customer||'')+'<div style="font-size:.7rem;color:#5A6A80">'+esc(o.phone||'')+'</div></td>'
+        +'<td>'+fmt(o.total)+'</td>'
+        +'<td><div class="arch-actions"><button class="btn-sm btn-open" onclick="ordToInvoice(\''+esc(o.id)+'\')">🧾 Facture · Invoice</button>'
+        +'<button class="btn-sm btn-del" onclick="ordDelete(\''+esc(o.id)+'\')">🗑</button></div></td>';
+      body.appendChild(tr);
+    });
+  }catch(e){body.innerHTML='<tr><td colspan="6">Échec du chargement · Failed to load</td></tr>';}
+}
+async function ordToInvoice(id){
+  const o=(window.__orders||[]).find(x=>x.id===id);
+  if(!o){alert('Commande introuvable. · Order not found.');return;}
+  await newInv();
+  document.getElementById('cCust').value=o.customer||'';
+  document.getElementById('cPhone').value=o.phone||'';
+  document.getElementById('cShipAddr').value=o.address||'';
+  document.getElementById('cNotes').value=(o.method==='Delivery'?'Delivery':'Pick up')+(o.notes?' — '+o.notes:'')+' · Order '+o.id;
+  sheets=[{desc:o.desc,qty:o.sheets,price:o.unitPrice}];
+  document.getElementById('cCuts').value=o.cuts||0;
+  document.getElementById('cCutPrice').value=o.cutRate||ORD_CUT;
+  rows=[];
+  if(o.deliveryFee>0) rows.push({desc:'Delivery — '+(o.zone||''),qty:1,price:o.deliveryFee});
+  ensureRows(); rebuildAll(); updateMeta();
+  showTab('invoice');
+}
+async function ordDelete(id){
+  if(AUTH.role!=='manager'){alert('Suppression réservée au gérant. · Manager only.');return;}
+  if(!confirm('Supprimer la commande '+id+' ? · Delete order '+id+'?'))return;
+  await fetch(FB+'/orders/'+id+'.json',{method:'DELETE'});
+  ordLoad();
+}
+
 /* ===== ACCOUNTS TAB (manager only) ===== */
 async function accLoad(){
   const body=document.getElementById('accBody');
@@ -712,46 +890,46 @@ async function accLoad(){
       const v=j[uid]||{};
       const me=uid===AUTH.uid;
       const tr=document.createElement('tr');
-      tr.innerHTML='<td>'+esc(v.email||'—')+(me?' <span style="color:#13C6E8">(أنت)</span>':'')+'</td>'
+      tr.innerHTML='<td>'+esc(v.email||'—')+(me?' <span style="color:#13C6E8">(vous · you)</span>':'')+'</td>'
         +'<td><select onchange="accSetRole(\''+esc(uid)+'\',this.value)"'+(me?' disabled':'')+'>'
-        +'<option value="employee"'+(v.role==='employee'?' selected':'')+'>موظف</option>'
-        +'<option value="manager"'+(v.role==='manager'?' selected':'')+'>مدير</option></select></td>'
+        +'<option value="employee"'+(v.role==='employee'?' selected':'')+'>Employé · Employee</option>'
+        +'<option value="manager"'+(v.role==='manager'?' selected':'')+'>Gérant · Manager</option></select></td>'
         +'<td style="font-size:.7rem;color:#5A6A80">'+esc(uid)+'</td>'
-        +'<td>'+(me?'':'<button class="btn-sm btn-del" onclick="accRemove(\''+esc(uid)+'\')">🚫 إلغاء الوصول</button>')+'</td>';
+        +'<td>'+(me?'':'<button class="btn-sm btn-del" onclick="accRemove(\''+esc(uid)+'\')">🚫 Retirer l’accès · Revoke</button>')+'</td>';
       body.appendChild(tr);
     });
-    if(!body.children.length)body.innerHTML='<tr><td colspan="4">ما فيه حسابات</td></tr>';
-  }catch(e){body.innerHTML='<tr><td colspan="4">تعذر التحميل</td></tr>';}
+    if(!body.children.length)body.innerHTML='<tr><td colspan="4">Aucun compte · No accounts</td></tr>';
+  }catch(e){body.innerHTML='<tr><td colspan="4">Échec du chargement · Failed to load</td></tr>';}
 }
 async function accCreate(){
   const email=document.getElementById('accEmail').value.trim();
   const pass=document.getElementById('accPass').value;
   const role=document.getElementById('accRole').value;
-  if(!email||pass.length<6){alert('اكتب الإيميل وكلمة مرور 6 حروف على الأقل.');return;}
+  if(!email||pass.length<6){alert('Entrez un courriel et un mot de passe d’au moins 6 caractères. · Enter an email and a password of at least 6 characters.');return;}
   try{
     /* signUp returns the NEW user's token; we discard it so the manager stays signed in */
     const r=await _fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key='+FB_API_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass,returnSecureToken:true})});
     const j=await r.json();
-    if(!r.ok){alert('تعذر إنشاء الحساب: '+authErrText(j));return;}
+    if(!r.ok){alert('Échec de création du compte : '+authErrText(j));return;}
     const w=await fetch(FB+'/roles/'+j.localId+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:role,email:email})});
-    if(!w.ok){alert('تم إنشاء الحساب بس تعذر تعيين الصلاحية. HTTP '+w.status);return;}
-    alert('✅ تم إنشاء الحساب. أعطِ الموظف الإيميل وكلمة المرور المؤقتة، وينصح يغيّرها من "نسيت كلمة المرور".');
+    if(!w.ok){alert('Compte créé, mais le rôle n’a pas pu être défini. HTTP '+w.status);return;}
+    alert('✅ Compte créé. Donnez le courriel et le mot de passe temporaire à l’employé, qui doit le changer via « Mot de passe oublié ». · Account created. Give the employee the email and temporary password; they should change it via “Forgot password”.');
     document.getElementById('accEmail').value='';
     document.getElementById('accPass').value='';
     accLoad();
   }catch(e){alert('Network error: '+e.message);}
 }
 async function accSetRole(uid,role){
-  if(uid===AUTH.uid){alert('ما تقدر تغيّر صلاحيتك.');return accLoad();}
+  if(uid===AUTH.uid){alert('Vous ne pouvez pas changer votre propre rôle. · You cannot change your own role.');return accLoad();}
   const r=await fetch(FB+'/roles/'+uid+'/role.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(role)});
-  if(!r.ok)alert('تعذر التغيير. HTTP '+r.status);
+  if(!r.ok)alert('Échec de la modification. HTTP '+r.status);
   accLoad();
 }
 async function accRemove(uid){
   if(uid===AUTH.uid)return;
-  if(!confirm('نلغي وصول هذا الحساب للنظام؟ (الحساب يبقى بس بدون صلاحية)'))return;
+  if(!confirm('Retirer l’accès de ce compte ? (le compte reste, sans droits) · Revoke access for this account? (the account stays, without rights)'))return;
   const r=await fetch(FB+'/roles/'+uid+'.json',{method:'DELETE'});
-  if(!r.ok)alert('تعذر الإلغاء. HTTP '+r.status);
+  if(!r.ok)alert('Échec de la suppression. HTTP '+r.status);
   accLoad();
 }
 /* ACRYLUX primary mark — embedded once, applied to every <img data-ax-logo> */
@@ -996,7 +1174,7 @@ function loadData(d){
 async function saveInvoice(){
   const d=getCurrentData();
   if(!d.num||d.customer==='—'){alert('Fill in Invoice # and Customer Name first.');return;}
-  if(AUTH.role!=='manager'&&String(loadedNum||'')!==''){alert('ما عندك صلاحية تعدل فاتورة محفوظة. اضغط New وسوّ فاتورة جديدة.');return;}
+  if(AUTH.role!=='manager'&&String(loadedNum||'')!==''){alert('Vous n’avez pas le droit de modifier une facture enregistrée. Cliquez New pour créer une nouvelle facture. · You cannot edit a saved invoice. Click New to create one.');return;}
   const btn=document.querySelector('.sc-btn.save');
   const wanted=d.num;
   if(btn){btn.disabled=true;btn.textContent='\u23F3 Saving\u2026';}
@@ -1061,7 +1239,7 @@ function openArchiveInv(num){
 }
 
 async function deleteArchiveInv(num){
-  if(AUTH.role!=='manager'){alert('الحذف للمدير فقط.');return;}
+  if(AUTH.role!=='manager'){alert('Suppression réservée au gérant. · Manager only.');return;}
   if(!confirm('Delete invoice #'+num+'?'))return;
   const arch=JSON.parse(localStorage.getItem('gmc_inv_archive')||'{}');
   delete arch[num];
@@ -1105,10 +1283,10 @@ async function claimNumber(d,wanted){
       const body=await g.json();
       if(body!==null&&body!==undefined){
         const who=String((body&&body.customer)||'—');
-        if(!confirm('الرقم '+want+' موجود (فاتورة: '+who+').\nتبي تستبدلها بهالفاتورة؟ القديمة بتنمسح.')) return {ok:false,err:'ما تم الحفظ.'};
+        if(!confirm('Le numéro '+want+' existe déjà (client : '+who+').\nLe remplacer par cette facture ? L’ancienne sera supprimée. · Invoice #'+want+' exists (customer: '+who+').\nReplace it with this invoice? The old one will be deleted.')) return {ok:false,err:'Non enregistré. · Not saved.'};
       }
       const p=await fetch(url0,{method:'PUT',headers:{'Content-Type':'application/json','if-match':etag},body:JSON.stringify(Object.assign({},d,{num:want}))});
-      if(p.status===412) return {ok:false,err:'الرقم '+want+' انحجز قبل لحظة. اختار رقم ثاني.'};
+      if(p.status===412) return {ok:false,err:'Le numéro '+want+' vient d’être pris. Choisissez-en un autre. · Number '+want+' was just taken. Choose another.'};
       if(!p.ok) return {ok:false,err:'HTTP '+p.status+': '+(await p.text())};
       return {ok:true,num:want,changed:false};
     }catch(e){ return {ok:false,err:'network'}; }
@@ -1157,7 +1335,7 @@ async function refreshSuggestion(){
 }
 async function newInv(){
   window.__cNumTyped=false;
-  /* رقم الفاتورة تلقائي: يفتح رقم جديد = أعلى رقم موجود + 1 */
+  /* Invoice number is automatic: a new invoice gets highest existing number + 1 */
   /* The number shown is only a SUGGESTION. It is never reserved and never
      counted, so opening the app or pressing New burns no numbers. The real
      number is claimed atomically at save time (see claimNumber). */
@@ -1189,13 +1367,14 @@ function showTab(name){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
-  const tabs=['invoice','archive','cutorder','waybill','report','accounts'];
+  const tabs=['invoice','archive','cutorder','waybill','report','order','accounts'];
   const idx=tabs.indexOf(name);
   if(idx>=0)document.querySelectorAll('.tab-bar button')[idx].classList.add('active');
   if(name==='archive')renderArchive();
   if(name==='cutorder'){coSyncFromInvoice();loadCoArchive();}
   if(name==='waybill')wbRender();
   if(name==='accounts')accLoad();
+  if(name==='order')ordLoad();
 }
 
 // ============ WAYBILL ============
@@ -1593,8 +1772,8 @@ async function saveCutOrder(){
   if(AUTH.role!=='manager'){
     try{
       const ex=await (await fetch(FB+'/cut_orders/'+d.invNum+'.json')).json();
-      if(ex!==null){alert('ما عندك صلاحية تعدل أمر قص محفوظ.');return;}
-    }catch(e){alert('تعذر التحقق من الأمر.');return;}
+      if(ex!==null){alert('Vous n’avez pas le droit de modifier une commande de coupe enregistrée. · You cannot edit a saved cut order.');return;}
+    }catch(e){alert('Impossible de vérifier la commande. · Could not verify the order.');return;}
   }
   const arch=JSON.parse(localStorage.getItem('gmc_co_archive')||'{}');
   arch[d.invNum]=d;
@@ -1666,7 +1845,7 @@ function openCutOrder(num){
 }
 
 async function deleteCutOrder(num){
-  if(AUTH.role!=='manager'){alert('الحذف للمدير فقط.');return;}
+  if(AUTH.role!=='manager'){alert('Suppression réservée au gérant. · Manager only.');return;}
   if(!confirm('Delete Cut Order #'+num+'?'))return;
   const arch=JSON.parse(localStorage.getItem('gmc_co_archive')||'{}');
   delete arch[num];
@@ -1759,6 +1938,7 @@ async function appInit(){
 }
 coInitGrid();
 coSetStatus('pending');
+ordInit();
 authBoot();
 </script>
 </body>
